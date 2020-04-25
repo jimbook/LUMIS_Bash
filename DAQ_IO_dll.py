@@ -1,7 +1,7 @@
 import usb.core
 import usb.util
 import time, threading
-
+import math
 class _USB_Manager(object):
     def __init__(self):
         super(_USB_Manager,self).__init__()
@@ -54,12 +54,25 @@ class USB_Manager(object):
         super(USB_Manager,self).__init__()
         self.DAQ = DAQ_IO()# c#库，对接DAQ
         self._findUSBStopflag = False  # 搜索USB接口线程标志
-        self._USBstatus = False
+        self._USBstatus = False #  USB标志
+        self._HVstatus = False # HV标志
+        self._currentHV = 50 #记录当前电压
         self.StartSearchUSB()
+        self.slowControlDict = {"TRIG_DAC":10,
+                                "DISCRIMINATOR_MASK1":18,
+                                "DISCRIMINATOR_MASK2":18,
+                                "PROBE_OTA":1,
+                                "EN_OR36":1,
+                                "AUTO_GAIN":1,
+                                "GAIN_SELECT":1,
+                                "ADC_EXT_INPUT":1,
+                                "SWITCH_TDC_ON":1
+                                }
+
+
 
     #搜索USB接口线程函数逻辑
     def _findUSBThreading(self, idVendor=0x258A, idProduct=0x1006):
-        print("USB Searcher:Looking for a matching USB device.\n")
         while (not self._USBstatus) and self._findUSBStopflag:
             self._USBstatus = self.DAQ.check_USB()
             time.sleep(0.5)
@@ -83,7 +96,8 @@ class USB_Manager(object):
             print("Manger:USB device is ready,no need to search.\n")
         else:
             print("Manger:Currently not searching for USB devices.\n")
-
+########################################会默认USB配置好
+    #发送二进制命令
     def CommandSend(self,OutData : int):
         if OutData <= 0xFFFF and OutData >= 0x000:
             return self.DAQ.CommandSend(OutData,2)
@@ -91,9 +105,62 @@ class USB_Manager(object):
             print("Manger:ValueError!")
             return False
 
+    #接收二进制命令
     def DataRecieve(self):
         InData = Array[byte](0x00,0x00)
         return self.DAQ.DataRecieve(InData,2),InData
+##########################################################
+    #更改slowControl配置
+    def slowControl_set(self,index : str,value : int):
+        if value in self.slowControlDict.keys():
+            if value >=0 and value < 2**self.slowControlDict.get(index):
+                self.DAQ.slowConfig.set_property(self.DAQ.slowConfig.settings["TRIG_DAC"], value)
+
+    #配置slow_control
+    def slowControl_config(self):
+        if self._USBstatus:
+            self.DAQ.sc_config_onc()
+
+    #配置probe_control
+    def probe_config(self):
+        if self._USBstatus:
+            self.DAQ.probe_config_once()
+
+###########################################################
+    #开启/关闭高压
+    def hv_switch(self,turnOn : bool):
+        if self._USBstatus:
+            self.DAQ.hv_switch(turnOn)
+            self._HVstatus  =  turnOn
+
+    #设置高压电压
+    def hv_set(self,voltage : float):
+        if self._USBstatus:
+            self.DAQ.hv_set(voltage)
+            self._currentHV = voltage
+##########################################################
+    def hv_smoothTurnOn(self,target_voltag: float  = 50 ):
+        tmp_hv = self._currentHV
+        if not self._currentHV:
+            self.hv_switch(True)
+        while (math.fabs(tmp_hv-target_voltag)>0.2):
+            if tmp_hv < 68:
+                if target_voltag > tmp_hv:
+                    tmp_hv += 1
+                else:
+                    tmp_hv -= 1
+            else:
+                if target_voltag > tmp_hv:
+                    tmp_hv += 0.1
+                else:
+                    tmp_hv -= 0.1
+            self.hv_set(tmp_hv)
+            self._currentHV = tmp_hv
+            time.sleep(0.5)
+
+
+
+
 
 
 
