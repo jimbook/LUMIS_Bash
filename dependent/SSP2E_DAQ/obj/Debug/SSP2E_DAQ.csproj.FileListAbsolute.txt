@@ -1,0 +1,38 @@
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe.config
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.pdb
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\bin\Debug\CyUSB.dll
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\bin\Debug\NationalInstruments.VisaNS.dll
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csprojAssemblyReference.cache
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Form1.resources
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Properties.Resources.resources
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.GenerateResource.cache
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CopyComplete
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.exe
+C:\Users\hugh leo\Desktop\another SPIROC\new\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.pdb
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe.config
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.pdb
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\bin\Debug\CyUSB.dll
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\bin\Debug\NationalInstruments.VisaNS.dll
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csprojAssemblyReference.cache
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Form1.resources
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Properties.Resources.resources
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.GenerateResource.cache
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CoreCompileInputs.cache
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CopyComplete
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.exe
+D:\下载\SSP2E_DAQ\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.pdb
+A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.pdb
+A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\CyUSB.dll
+A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\NationalInstruments.VisaNS.dll
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csprojAssemblyReference.cache
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Form1.resources
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Properties.Resources.resources
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.GenerateResource.cache
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CoreCompileInputs.cache
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CopyComplete
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.pdb
+A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe.config
+A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe
+A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.exe
