@@ -45,7 +45,7 @@ class _USB_Manager(object):
 
 import sys
 import clr
-sys.path.append(r'A:\工作\实验室\LUMIS\DAQ_IO\DAQ_IO\bin\Debug')
+sys.path.append(r'.\dependent\DAQ_IO\DAQ_IO\bin\Debug')
 clr.AddReference('DAQ_IO')
 from DAQ_IO_DLL import DAQ_IO
 from System import *
