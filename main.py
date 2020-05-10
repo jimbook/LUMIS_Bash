@@ -78,7 +78,7 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
             try:
                 if equipment.USBstatus:
                     accident = []
-                    for i in range.get("change",None):
+                    for i in range.get("change",[]):
                         a = equipment.slowControl_set(i.index,i.value)
                         if not a:
                             if i.index in equipment.slowControlLengthDict.keys():
@@ -139,7 +139,6 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
                         OUT.put({"return":True})
                     else:
                         OUT.put({"return": True, "tag": ["INFO"], "INFO": "High Voltag module has turned off."})
-
             except BaseException as e:
                 OUT.put({"return": False, "tag": ["Error"], "Error": e})
         elif signal.get("cmd",None) == "startAcceptData":

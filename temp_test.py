@@ -57,9 +57,6 @@
 # plt.show()
 
 import time
-
-for i,j in [[1,2],[3,4]]:
-    print(i,j)
 def USB_wait(flag : dict):
     i = 0
     point = ""
@@ -86,8 +83,24 @@ def HV_wait(flag : dict):
             i = 0
             j += 1
         time.sleep(0.4)
+def SC_wait(flag : dict):
+    '''
 
-print(int("A"))
+    :param flag: flgg["SC"] True表示未处于等待状态，Flase表示处于等待状态
+    :return:
+    '''
+    i = 0
+    point = ["░", "▒", "▓", "█", "▓", "▒", "░", " "]
+    while not flag["SC"]:
+        print("\rWaiting for setting slow control {0}".format(point[i]),end='')
+        if i < len(point)-1:
+            i += 1
+        else:
+            i = 0
+        time.sleep(0.2)
+
+SC_wait({"SC":False})
+
 
 
 

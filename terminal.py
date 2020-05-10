@@ -207,7 +207,7 @@ def terminal(IN : mp.Queue,OUT : mp.Queue):
                     print("\ntimeout:Device not found,please check the USB port.")
                 elif "Error" in reply.get("tag",None):
                     print("Error :",reply.get("Error"))
-        elif command[0] == "auto":#自动
+        elif command[0] == "auto":
             OUT.put({"cmd":"AutoAll"})
             flag["Auto"] = 0
             t1 = threading.Thread(target=Auto_wait, args=(flag,))  # this thread aims for printing waiting information.
@@ -232,26 +232,135 @@ def terminal(IN : mp.Queue,OUT : mp.Queue):
                     x = ""
                     for i in command:
                         x += i
-                    print("Oder \'{0}\' need more arguments".format())
+                    print("Oder \'{0}\' need more arguments".format(x))
                     del x
+                    continue
                 else:
                     x = ""
                     for i in command:
                         x += i
                     print("There is no such order: \'{0}\'".format(x))
                     del x
+                    continue
             if len(command) == 3:
                 if command[1].lower() == "-s" or command[1].lower() == "-set":
                     if re.match("^\d*$",command[2]):
                         OUT.put({"cmd":"setHV","voltag": int(command[2])})
                     else:
                         print("target voltag must be an integer.")
+                        continue
                 else:
                     x = ""
                     for i in command:
                         x += i
                     print("There is no such order: \'{0}\'".format(x))
                     del x
+                    continue
+            flag["HVmove"] = False
+            t1 = threading.Thread(target=HV_wait, args=(flag,))  # this thread aims for printing waiting information.
+            t1.start()
+            reply = IN.get()
+            flag["HVmove"] = True
+            t1.join()
+            if reply.get("return"):
+                for i in reply.get("tag",[]):
+                    print(reply.get(i))
+                if not reply.get("tag"):
+                    print("The high voltag setting if finished.")
+            else:
+                for i in reply.get("tag",[]):
+                    print(reply.get(i))
+        elif command[0] == "SC" or command[0] == "slowControl":
+            if len(command) == 2:
+                if command[1] == "-d" or command[1] == "-defualt":
+                    OUT.put({"cmd":"setSlowControl"})
+                elif command[1] == "-s" or  command[1] ==  "-set":
+                    change = []
+                    msg = [""]
+                    print("Please enter the item and value you want to change and end with q or cancel with c.")
+                    while True:
+                        msg = input(">>>").strip().split()
+                        if len(msg) == 1:
+                            if msg[0] == "q" or msg[0] == "c":
+                                break
+                            else:
+                                print("unable to identify your enter.")
+                                continue
+                        elif len(msg) == 2:
+                            if re.match("^\d$",msg[1]):
+                                change.append({msg[0]:int(msg[1])})
+                            else:
+                                print("value must be an intager.")
+                                continue
+                        else:
+                            print("unable to identify your enter.")
+                            continue
+                    if msg[0] == "c":
+                        del msg
+                        del change
+                        continue
+                    OUT.put({"cmd":"setSlowControl","change":change})
+                    t1 = threading.Thread(target=SC_wait,args=(flag,))
+                    t1.start()
+                    reply = IN.get()
+                    flag["SC"] = True
+                    t1.join()
+                    if reply.get("return"):
+                        for i in reply.get("ExceptDescription",[]):
+                            print(i)
+                        if len(reply.get("ExceptDescription",[])) == 0:
+                            print("Slow Control was successfully configured.")
+                        else:
+                            for i in reply.get("ExceptDescription", []):
+                                print(i)
+                    else:
+                        for i in reply.get("tag"):
+                            print(i)
+                else:
+                    x = ""
+                    for i in command:
+                        x += i
+                    print("There is no such order: \'{0}\'".format(x))
+                    del x
+                    continue
+        elif command[0] == "receive":
+            if len(command) == 2:
+                if command[1] == "-i" or command[1] == "-initiate" or command[1] == "-start":
+                    OUT.put({"cmd":"startAcceptData"})
+                    print("Starting the dtaa receving process.")
+                    reply = IN.get()
+                    if reply.get("return"):
+                        print("Data receiving proess has alread started,data is stored in {0}".format(
+                            reply.get("dataPath")))
+                    else:
+                        for i in reply.get("tag",[]):
+                            print(i)
+                    continue
+                elif command[1] == "-c" or command[1] == "-cease" or command[1] == "-stop":
+                    OUT.put({"cmd": "startAcceptData"})
+                    print("Stopping the dtaa receving process.")
+                    reply = IN.get()
+                    if reply.get("return"):
+                        print("Data receiving proess has alread stopped,data is stored in {0}".format(
+                            reply.get("dataPath")))
+                    else:
+                        for i in reply.get("tag",[]):
+                            print(i)
+                    continue
+                x = ""
+                for i in command:
+                    x += i
+                print("There is no such order: \'{0}\'".format(x))
+                del x
+                continue
+        else:
+            x = ""
+            for i in command:
+                x += i
+            print("There is no such order: \'{0}\'".format(x))
+            del x
+            continue
+
 
 
 
@@ -282,6 +391,23 @@ def HV_wait(flag : dict):
         else:
             i = 0
         time.sleep(0.4)
+
+#等待slowControl设置
+def SC_wait(flag : dict):
+    '''
+
+    :param flag: flgg["SC"] True表示未处于等待状态，Flase表示处于等待状态
+    :return:
+    '''
+    i = 0
+    point = ["░","▒","▓","█","▓","▒","░"," "]
+    while not flag["SC"]:
+        print("\rWaiting for setting slow control {0}".format(point[i]),end='')
+        if i < len(point)-1:
+            i += 1
+        else:
+            i = 0
+        time.sleep(0.2)
 
 #等待自动调节
 def Auto_wait(flag : dict):
