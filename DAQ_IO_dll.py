@@ -59,7 +59,6 @@ class USB_Manager(object):
         self.HVstatus = False # HV标志
         self.DataAcceptStatus = False #数据接收读取进程
         self.currentHV = 40 #记录当前电压，高压电源一打开就是50伏特，最低只能调节到40伏特
-        self.StartSearchUSB()
         self.slowControlLengthDict = {
             "TRIG_DAC":10,
             "DISCRIMINATOR_MASK1":18,

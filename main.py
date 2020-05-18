@@ -2,7 +2,7 @@ from multiprocessing import Process
 import os
 import multiprocessing as mp
 import time
-from terminal  import terminal,communication
+from terminal_test  import terminal
 cmdDict = {
 ""
 }
@@ -25,13 +25,13 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
             搜索出错返回False，同时返回错误标签,错误标签包含错误信息
             '''
             try:
-                reply = equipment.searchUSB(signal.get("timeout",signal.get("timeout",-1)))
+                reply = equipment.searchUSB(signal.get("timeout",-1))
                 if reply:
                     OUT.put({"return": True})
                 else:
                     OUT.put({"return": False, "tag": ["timeout"], "timeout": True})
             except BaseException as e:
-                OUT.put({"return":False,"tag":["Error"],"Error":e})
+                OUT.put({"return":False,"tag":["Error"],"Error":e}).
         elif signal.get("cmd",None) == "AutoAll":
             '''
             自动配置+开启高压+开启数据读取
@@ -170,8 +170,10 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
 
 if __name__ == '__main__':
     mp.set_start_method('spawn')
-    print("")
-    q = mp.Queue()
-    p_IO = mp.Process(target=communication, args=(q,))
+    print("DAQ Start!")
+    toControl = mp.Queue()
+    toTerminal = mp.Queue()
+    p_IO = mp.Process(target=communication, args=(toControl, toTerminal))
     p_IO.start()
-    terminal(q)
+    terminal(toTerminal, toControl)
+    print("all server has stopped")
