@@ -438,6 +438,7 @@ def Auto_wait(flag : dict):
 
 
 if __name__ == '__main__':
+    #from main import communication
     mp.set_start_method('spawn')
     print("DAQ Start!")
     toControl = mp.Queue()

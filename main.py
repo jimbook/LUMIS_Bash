@@ -1,12 +1,6 @@
-from multiprocessing import Process
-import os
 import multiprocessing as mp
-import time
-from terminal_test  import terminal
-cmdDict = {
-""
-}
-from DAQ_IO_dll import USB_Manager
+from terminal_test import terminal
+#from DAQ_IO_dll import USB_Manager
 def communication(IN : mp.Queue,OUT : mp.Queue):
     equipment = USB_Manager()#重构库类，用于与设备通讯
     while True:
@@ -31,7 +25,7 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
                 else:
                     OUT.put({"return": False, "tag": ["timeout"], "timeout": True})
             except BaseException as e:
-                OUT.put({"return":False,"tag":["Error"],"Error":e}).
+                OUT.put({"return":False,"tag":["Error"],"Error":e})
         elif signal.get("cmd",None) == "AutoAll":
             '''
             自动配置+开启高压+开启数据读取
@@ -166,7 +160,512 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
                 OUT.put({"return": False, "tag": ["Error"], "Error": e})
     OUT.put({"return":True})
 
+import time, threading
+import math,os
+import sys
+import clr
+sys.path.append(r'.\dependent\DAQ_IO\DAQ_IO\bin\Debug')
+clr.AddReference('DAQ_IO')
+from DAQ_IO_DLL import DAQ_IO
+from System import *
+class USB_Manager(object):
+    def __init__(self):
+        super(USB_Manager,self).__init__()
+        self.DAQ = DAQ_IO()# c#库，对接DAQ
+        self.findUSBStopflag = False  # 搜索USB接口线程标志
+        self.dataAcceptflag = False # 数据接收线程
+        self.USBstatus = False # USB标志
+        self.HVstatus = False # HV标志
+        self.DataAcceptStatus = False #数据接收读取进程
+        self.currentHV = 40 #记录当前电压，高压电源一打开就是50伏特，最低只能调节到40伏特
+        self.slowControlLengthDict = {
+            "TRIG_DAC":10,
+            "DISCRIMINATOR_MASK1":18,
+            "DISCRIMINATOR_MASK2":18,
+            "PROBE_OTA":1,
+            "EN_OR36":1,
+            "AUTO_GAIN":1,
+            "GAIN_SELECT":1,
+            "ADC_EXT_INPUT":1,
+            "SWITCH_TDC_ON":1
+        }
+        self.slowControlContentDict = {
+            "TRIG_DAC":0x0fa,
+            "DISCRIMINATOR_MASK1":0,
+            "DISCRIMINATOR_MASK2":0,
+            "PROBE_OTA":0,
+            "EN_OR36":0,
+            "AUTO_GAIN":0,
+            "GAIN_SELECT":0,
+            "ADC_EXT_INPUT":0,
+            "SWITCH_TDC_ON":1
+        }
 
+
+    #搜索USB设备
+    def searchUSB(self,timeout : int = -1):
+        i = 0
+        while not self.USBstatus:
+            self.USBstatus = self.DAQ.check_USB()
+            if timeout == 0:
+                return False
+            time.sleep(0.2)
+            if i<5:
+                i = i+1
+            else:
+                i = 0
+                timeout -= 1
+        return True
+
+
+    #搜索USB接口线程函数逻辑
+    def _findUSBThreading(self, idVendor=0x258A, idProduct=0x1006):
+        while (not self.USBstatus) and self.findUSBStopflag:
+            self.USBstatus = self.DAQ.check_USB()
+            time.sleep(0.5)
+        if self.USBstatus:
+            self.findUSBStopflag = False
+            print("USB Searcher:USB Successfully found the USB device.\n")
+        elif not self.findUSBStopflag:
+            print("USB Searcher:Search for USB devices has been stopped.\n")
+
+    #开启搜索USB接口线程
+    def StartSearchUSB(self):
+        self._findUSBStopflag = True
+        t = threading.Thread(target=self._findUSBThreading,name="looking for a matching USB device")
+        t.start()
+
+    #停止USB搜索
+    def stopSearchUSB(self):
+        if self.findUSBStopflag:
+            self.findUSBStopflag = False
+        elif self.dev:
+            print("Manger:USB device is ready,no need to search.\n")
+        else:
+            print("Manger:Currently not searching for USB devices.\n")
+########################################会默认USB配置好
+    #发送二进制命令
+    def CommandSend(self,OutData : int):
+        if OutData <= 0xFFFF and OutData >= 0x000:
+            return self.DAQ.CommandSend(OutData,2)
+        else:
+            print("Manger:ValueError!")
+            return False
+
+    #接收二进制命令
+    def DataRecieve(self):
+        return self.DAQ.DataRecieve_toPython(2)
+##########################################################
+    #更改slowControl配置
+    def slowControl_set(self,index : str,value : int):
+        if index in self.slowControlLengthDict.keys():
+            if value >=0 and value < 2**self.slowControlLengthDict.get(index):
+                self.DAQ.slowConfig.set_property(self.DAQ.slowConfig.settings[index], value)
+                self.slowControlContentDict[index] = value
+                return True
+        return False
+
+    #配置slow_control
+    def slowControl_config(self):
+        if self.USBstatus:
+            self.DAQ.sc_config_onc()
+        else:
+            raise ConnectException
+
+    #配置probe_control
+    def probe_config(self):
+        if self.USBstatus:
+            self.DAQ.probeConfig.init()
+            self.DAQ.probe_config_once()
+        else:
+            raise ConnectException
+
+###########################################################
+    #开启/关闭高压
+    def hv_switch(self,turnOn : bool):
+        '''
+        :param turnOn: True-turn on hv model ；False-turn off hv model
+        :return:void
+        开启高压时，电压为50V，关闭高压模块时，电压降到40V
+        调用库时，先检索程序内高压标志，如果已经是目标，则不发送命令
+        '''
+        if self.USBstatus:
+            if self.HVstatus != turnOn:
+                self.DAQ.hv_switch(turnOn)
+                self.HVstatus  =  turnOn
+                if turnOn:
+                    self.currentHV = 50
+                else:
+                    self.currentHV = 40
+        else:
+            raise ConnectException
+
+    #设置高压电压
+    def hv_set(self,voltage : float):
+        '''
+        :param voltage: target voltag
+        :return:void
+        首先检查输入目标电压是否合理，小于40V则抛出异常
+        检查USB设备连接标志，未连接则抛出异常
+        检查高压模块状态，未开启则开启高压模块
+        '''
+        if voltage < 40:
+            raise VoltagValueError
+        if self.USBstatus:
+            if not self.HVstatus:
+                self.hv_switch(True)
+            self.DAQ.hv_set(voltage)
+            self.currentHV = voltage
+        else:
+            raise ConnectException
+##########################################################
+    #平滑调节高压
+    def hv_smoothTurnOn(self,target_voltag: float  = 50 ):
+        if target_voltag < 40 or target_voltag > 200:
+            raise ValueError("target voltag must between 40 and 200.")
+        if not self.HVstatus:
+            self.hv_switch(True)
+        tmp_hv = self.currentHV
+        while (math.fabs(tmp_hv-target_voltag)>0.2):
+            if tmp_hv < 68:
+                if target_voltag > tmp_hv:
+                    tmp_hv += 1
+                else:
+                    tmp_hv -= 1
+            else:
+                if target_voltag > tmp_hv:
+                    tmp_hv += 0.1
+                else:
+                    tmp_hv -= 0.1
+            self.hv_set(tmp_hv)
+            self.currentHV = tmp_hv
+            time.sleep(0.5)
+
+    #半自动电子学刻度（将阻塞1min）
+    def elecCalib2E(self,path = ".\\data\\temporary"):
+        filePath = os.path.join(path,self.DAQ.elecCalib2E(path))
+        return filePath
+
+##########################################################
+    #接收数据线程
+    def DataAcceptThread(self,path = ".\\data\\temporary"):
+        if not self.DataAcceptStatus:
+            filePath = os.path.join(path,self.DAQ.start_acq(path))
+            self.DataAcceptStatus = True
+            return filePath
+        else:
+            raise RepeatAcceptException
+    #停止数据接收
+    def StopDataAccept(self):
+        if self.DataAcceptStatus:
+            self.DAQ.stop_acq()
+            self.DataAcceptStatus = False
+##########################################################
+    #辅助函数
+
+
+
+#---------------------------------------------------------------------
+#错误信息：设备未连接
+class ConnectException(Exception):
+    def __init__(self):
+        super(self).__init__()
+    def __str__(self):
+        return "The device is not connected properly."
+#错误信息：电压值设置不合理
+class VoltagValueError(ValueError):
+    def __init__(self):
+        super().__init__()
+    def __str__(self):
+        return "Voltag should be greater than 40V"
+#错误信息：重复开启数据读取线程
+class RepeatAcceptException(Exception):
+    def __init__(self):
+        super().__init__()
+    def __str__(self):
+        return "Don't receive data repeatedly.Please stop the DataAcceptThread first."
+
+import os,threading
+import multiprocessing as mp
+import time
+import logging,collections,re
+
+#终端输入和分发命令
+def terminal(IN : mp.Queue,OUT : mp.Queue):
+    # 操作：连接USB在开启程序时进行搜索；
+    # terminal：显示正在搜索；直到成功连接到usb接口terminal显示
+    flag = {"checkUSB":False,"HVmove":True,"Auto":-1}#等待标志，checkUSB是等待设备上线标志，HVmove是等待电压调节标志,Auto是自动调节步骤标志，True表示未在等待,
+    OUT.put({"cmd":"checkUSB","timeout":300})#send command oder to communication proess.
+    t1 = threading.Thread(target=USB_wait,args=(flag,))#this thread aims for printing waiting information.
+    t1.start()
+    time.sleep(2)
+    reply = IN.get()#获取通讯进程返回的信息，未返回时阻塞
+    flag["checkUSB"] = True#结束打印等待信息
+    t1.join()
+    if reply["return"]:#如果搜索成功
+        print("\nDevice ready.")
+    else:
+        print("\ntimeout:Device not found,please check the USB port.")
+    while True:
+        time.sleep(0.5)
+        command = input(">>>").strip().split()
+        if command[0] == "quit" or command == "exit":#退出程序
+            OUT.put({"cmd":"exit"})
+            reply = IN.get()
+            if reply.get("return",False):
+                break
+            else:
+                print("DAQ communication server refuses to stop")
+        elif command[0] == "reconnect":     #重新连接USB
+            flag["checkUSB"] = False
+            OUT.put({"cmd": "checkUSB", "timeout": 300})  # send command oder to communication proess.
+            t1 = threading.Thread(target=USB_wait, args=(flag,))  # this thread aims for printing waiting information.
+            t1.start()
+            time.sleep(2)
+            reply = IN.get()  # 获取通讯进程返回的信息，未返回时阻塞
+            flag["checkUSB"] = True  # 结束打印等待信息
+            t1.join()
+            if reply["return"]:  # 如果搜索成功
+                print("\nDevice ready.")
+            else:
+                if "timeout" in reply.get("tag",None):
+                    print("\ntimeout:Device not found,please check the USB port.")
+                elif "Error" in reply.get("tag",None):
+                    print("Error :",reply.get("Error"))
+        elif command[0] == "auto":
+            OUT.put({"cmd":"AutoAll"})
+            flag["Auto"] = 0
+            t1 = threading.Thread(target=Auto_wait, args=(flag,))  # this thread aims for printing waiting information.
+            t1.start()
+            while flag["Auto"] >= 0:
+                reply = IN.get()
+                if reply["return"]:
+                    flag["Auto"] = reply["step"]
+                    if reply["step"] == 4:
+                        dataPath = reply["dataPath"]
+                        break
+                else:
+                    flag["Auto"] = -1
+                    break
+            t1.join()
+            print("\nData is stored to {0}".format(dataPath))
+        elif command[0] == "HV":
+            if len(command) == 2:
+                if command[1].lower() == "-o" or command[1].lower() == "-open":
+                    OUT.put({"cmd":"switchHV","turnOn":True})
+                elif command[1].lower() == "-c" or command[1].lower() == "-close":
+                    OUT.put({"cmd":"switchHV","turnOn":False})
+                elif command[1].lower() == "-s" or command[1].lower() == "-set":
+                    x = ""
+                    for i in command:
+                        x += i
+                    print("Oder \'{0}\' need more arguments".format(x))
+                    del x
+                    continue
+                else:
+                    x = ""
+                    for i in command:
+                        x += i
+                    print("There is no such order: \'{0}\'".format(x))
+                    del x
+                    continue
+            if len(command) == 3:
+                if command[1].lower() == "-s" or command[1].lower() == "-set":
+                    if re.match("^\d*$",command[2]):
+                        OUT.put({"cmd":"setHV","voltag": int(command[2])})
+                    else:
+                        print("target voltag must be an integer.")
+                        continue
+                else:
+                    x = ""
+                    for i in command:
+                        x += i
+                    print("There is no such order: \'{0}\'".format(x))
+                    del x
+                    continue
+            flag["HVmove"] = False
+            t1 = threading.Thread(target=HV_wait, args=(flag,))  # this thread aims for printing waiting information.
+            t1.start()
+            reply = IN.get()
+            flag["HVmove"] = True
+            t1.join()
+            if reply.get("return"):
+                for i in reply.get("tag",[]):
+                    print(reply.get(i))
+                if not reply.get("tag"):
+                    print("\nThe high voltag setting if finished.")
+            else:
+                for i in reply.get("tag",[]):
+                    print(reply.get(i))
+        elif command[0] == "SC" or command[0] == "slowControl":
+            if len(command) == 2:
+                if command[1] == "-d" or command[1] == "-defualt":
+                    OUT.put({"cmd":"setSlowControl"})
+                elif command[1] == "-s" or  command[1] ==  "-set":
+                    change = []
+                    msg = [""]
+                    print("Please enter the item and value you want to change and end with q or cancel with c.")
+                    while True:
+                        msg = input(">>>").strip().split()
+                        if len(msg) == 1:
+                            if msg[0] == "q" or msg[0] == "c":
+                                break
+                            else:
+                                print("unable to identify your enter.")
+                                continue
+                        elif len(msg) == 2:
+                            if re.match("^\d$",msg[1]):
+                                change.append({msg[0]:int(msg[1])})
+                            else:
+                                print("value must be an intager.")
+                                continue
+                        else:
+                            print("unable to identify your enter.")
+                            continue
+                    if msg[0] == "c":
+                        del msg
+                        del change
+                        continue
+                    OUT.put({"cmd":"setSlowControl","change":change})
+                    t1 = threading.Thread(target=SC_wait,args=(flag,))
+                    t1.start()
+                    reply = IN.get()
+                    flag["SC"] = True
+                    t1.join()
+                    if reply.get("return"):
+                        for i in reply.get("ExceptDescription",[]):
+                            print(i)
+                        if len(reply.get("ExceptDescription",[])) == 0:
+                            print("Slow Control was successfully configured.")
+                        else:
+                            for i in reply.get("ExceptDescription", []):
+                                print(i)
+                    else:
+                        for i in reply.get("tag"):
+                            print(i)
+                else:
+                    x = ""
+                    for i in command:
+                        x += i
+                    print("There is no such order: \'{0}\'".format(x))
+                    del x
+                    continue
+        elif command[0] == "receive":
+            if len(command) == 2:
+                if command[1] == "-i" or command[1] == "-initiate" or command[1] == "-start":
+                    OUT.put({"cmd":"startAcceptData"})
+                    print("Starting the dtaa receving process.")
+                    reply = IN.get()
+                    if reply.get("return"):
+                        print("Data receiving proess has alread started,data is stored in {0}".format(
+                            reply.get("dataPath")))
+                    else:
+                        for i in reply.get("tag",[]):
+                            print(i)
+                    continue
+                elif command[1] == "-c" or command[1] == "-cease" or command[1] == "-stop":
+                    OUT.put({"cmd": "startAcceptData"})
+                    print("Stopping the dtaa receving process.")
+                    reply = IN.get()
+                    if reply.get("return"):
+                        print("Data receiving proess has alread stopped,data is stored in {0}".format(
+                            reply.get("dataPath")))
+                    else:
+                        for i in reply.get("tag",[]):
+                            print(i)
+                    continue
+                x = ""
+                for i in command:
+                    x += i
+                print("There is no such order: \'{0}\'".format(x))
+                del x
+                continue
+        else:
+            x = ""
+            for i in command:
+                x += " "+i
+            print("There is no such order: \'{0}\'".format(x))
+            del x
+            continue
+
+#等待USB连接
+def USB_wait(flag : dict):
+    i = 0
+    point = ""
+    while not flag["checkUSB"]:
+        if i <=6:
+            point += "·"
+            i += 1
+        else:
+            point = ""
+            i = 0
+        print("\rWaiting for equipment to come online {0}".format(point),end='')
+        time.sleep(0.4)
+    print("\rWaiting for equipment to come online {0}".format(point))
+
+#等待高压调节
+def HV_wait(flag : dict):
+    i = 0
+    point_0 = ["▁","▂","▃","▄","▅","▆","▇","█"]
+    while not flag["HVmove"]:
+        print("\rWaiting for regulating voltag {0}".format(point_0[i]),end='')
+        if i < len(point_0)-1:
+            i += 1
+        else:
+            i = 0
+        time.sleep(0.4)
+    print("\rWaiting for regulating voltag {0}".format(point_0[-1]))
+
+#等待slowControl设置
+def SC_wait(flag : dict):
+    '''
+
+    :param flag: flgg["SC"] True表示未处于等待状态，Flase表示处于等待状态
+    :return:
+    '''
+    i = 0
+    point = ["░","▒","▓","█","▓","▒","░"," "]
+    while not flag["SC"]:
+        print("\rWaiting for setting slow control {0}".format(point[i]),end='')
+        if i < len(point)-1:
+            i += 1
+        else:
+            i = 0
+        time.sleep(0.2)
+
+#等待自动调节
+def Auto_wait(flag : dict):
+    '''
+    :param flag: flag["Auto"] -1表示未处于等待状态，0~3表示处于自动配置的步骤数
+    :return:
+    '''
+    i = 0
+    j = 0
+    point_0 = ["▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"]
+    taskName = ["<set slow control configuration>","<set probe configuration>","<turn on high voltag module>","<receive data>",]
+    while flag["Auto"] >= 0:
+        if flag["Auto"] !=4:
+            print("\rTask:{0} is in progress. {1} {2}%".format(taskName[flag["Auto"]],"█" * j + point_0[i], j * len(point_0) + i), end='')
+        else:
+            print("\rWaiting for the automatic configuration process to end. {0} {1}% {2}".format("█" * j + point_0[i], j * len(point_0) + i,flag["Auto"]), end='')
+        if i < len(point_0) - 1:
+            i += 1
+        else:
+            i = 0
+            j += 1
+        while (flag["Auto"] == 0 and j*len(point_0)+i == 40) | (flag["Auto"] == 1 and j*len(point_0)+i == 80) | \
+                (flag["Auto"] == 2 and j*len(point_0)+i == 90) | (flag["Auto"] == 3 and j*len(point_0)+i == 99):
+            time.sleep(0.5)
+        if (flag["Auto"] == 1 and j*len(point_0)+i <= 40) | (flag["Auto"] == 2 and j*len(point_0)+i <= 80) | \
+                (flag["Auto"] == 3 and j*len(point_0)+i <= 90) | (flag["Auto"] == 4 and j*len(point_0)+i <= 100):
+            time.sleep(0.1)
+        else:
+            time.sleep(0.4)
+        if j*len(point_0)+i == 100:
+            flag["Auto"] = -1
+        elif flag["Auto"] == 4 and j*len(point_0)+i == 99:
+            flag["Auto"] = -1
+    print("\rWaiting for the automatic configuration process to end. {0} {1}%".format("█" * (j + 1),100), end='')
 
 if __name__ == '__main__':
     mp.set_start_method('spawn')

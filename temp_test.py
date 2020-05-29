@@ -155,20 +155,26 @@
 # c = ET.SubElement(a, 'c')
 # d = ET.SubElement(c, 'd')
 # print(ET.tostring(b,encoding="unicode"))
-import  socket,time
-s = socket.socket(type=socket.SOCK_DGRAM)
-
-host = '127.0.0.1'
-port = 2000
-address = (host,port)
-s.bind((host,port+1))
-for i in range(10):
-    s.sendto('Good luck!'.encode("utf-8"),address)
-    time.sleep(1)
-    print(s.recvfrom(1024))
-
-#print(s.recvfrom(1024))
-s.close()
-
-
-
+# try:
+#     import  socket,time
+#     s = socket.socket(type=socket.SOCK_DGRAM)
+#
+#     host = '127.0.0.1'
+#     port = 2000
+#     address = (host,port)
+#     s.bind((host,port+1))
+#     for i in range(10):
+#         s.sendto('Good luck!'.encode("utf-8"),address)
+#         time.sleep(1)
+#         print(s.recvfrom(1024))
+#
+#     #print(s.recvfrom(1024))
+#     s.close()
+# except BaseException as e:
+#     print(e)
+import numpy as np
+i = np.array(range(10))
+print(i)
+print(i[0:5])
+for j in range(10)[0:5]:
+    print(j)
