@@ -103,8 +103,6 @@ class SSP2E_Data(object):
                 continue
             self._unpackage(buff[header:tails+2])
             buff = buff[tails+3:]
-            if len(self) >= 51260:
-                print(len(self))
 
     def _unpackage(self,source):
         # Unpackage a SSP2E packet.
