@@ -151,6 +151,7 @@ if __name__ == "__main__":
     ssp = SSP2E_Data()
     ssp.load("C:\\Users\\MACHENIKE\\Desktop\\tempData_20200518_212846.dat")
     print("final:",len(ssp))
+    print(ssp._SCAlist)
     # f = open("C:\\Users\\MACHENIKE\\Desktop\\tempData_20200518_212846.dat",'rb')
     # b = f.read(1024)
     # print(len(b))
