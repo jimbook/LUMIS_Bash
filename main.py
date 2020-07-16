@@ -31,7 +31,7 @@ def communication(IN : mp.Queue,OUT : mp.Queue):
                 else:
                     OUT.put({"return": False, "tag": ["timeout"], "timeout": True})
             except BaseException as e:
-                OUT.put({"return":False,"tag":["Error"],"Error":e}).
+                OUT.put({"return":False,"tag":["Error"],"Error":e})
         elif signal.get("cmd",None) == "AutoAll":
             '''
             自动配置+开启高压+开启数据读取

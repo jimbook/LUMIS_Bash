@@ -36,3 +36,16 @@ A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.pdb
 A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe.config
 A:\工作\实验室\LUMIS\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe
 A:\工作\实验室\LUMIS\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.exe
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe.config
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.exe
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\bin\Debug\SSP2E_DAQ.pdb
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\bin\Debug\CyUSB.dll
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\bin\Debug\NationalInstruments.VisaNS.dll
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csprojAssemblyReference.cache
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Form1.resources
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.Properties.Resources.resources
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.GenerateResource.cache
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CoreCompileInputs.cache
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.csproj.CopyComplete
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.exe
+C:\Users\MACHENIKE\Desktop\LUMIS_Bash\dependent\SSP2E_DAQ\obj\Debug\SSP2E_DAQ.pdb

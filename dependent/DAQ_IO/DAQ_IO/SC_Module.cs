@@ -613,7 +613,7 @@ namespace DAQ_IO_DLL
             settings.Add("BANDGAP_PP", 103);
             settings.Add("EN_DAC", 104);
             settings.Add("DAC_PP", 105);
-            settings.Add("TRIG_DAC", 106); // very important
+            settings.Add("TRIG_DAC", 250); // very important
             settings.Add("GAIN_DAC", 107);  // very important
             settings.Add("DELAY_START_RAMP_TDC_PP", 108);
             settings.Add("DELAY_START_RAMP_TDC", 109);
@@ -629,7 +629,7 @@ namespace DAQ_IO_DLL
             settings.Add("DISCRIMINATOR_MASK2", 119);
             settings.Add("NC4", 120);
             settings.Add("DISCRI_DELAY_PP", 121);
-            settings.Add("DELAY_TRIGGER", 122); // change frequently
+            settings.Add("DELAY_TRIGGER", 172); // change frequently
             for (i = 0; i < 36; i++)
             {
                 string Key = "DISCRI_4BIT_ADJUST" + i.ToString();
@@ -670,7 +670,7 @@ namespace DAQ_IO_DLL
             for (i = 0; i < 36; i++)
             {
                 string Key = "INDAC" + i.ToString();
-                this.set_property(settings[Key.ToString()], 0x1ff);
+                this.set_property(settings[Key.ToString()], 255);
             }
             this.set_property(settings["CAP_HG_PA_COMPENSATION"], 0x0f);
             this.set_property(settings["NC2"], 0);
@@ -681,7 +681,7 @@ namespace DAQ_IO_DLL
             for (i = 0; i < 36; i++)
             {
                 string Key = "PREAMP_GAIN" + i.ToString();
-                this.set_property(settings[Key.ToString()], 0xd8);
+                this.set_property(settings[Key.ToString()], 2744);
             }
             //disable channel 0
             //this.set_property(settings.PREAMP_GAIN[0], 0xec);
