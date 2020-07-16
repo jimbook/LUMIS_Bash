@@ -128,3 +128,18 @@ C#通过内建模块`XmlSerializer`将对象序列化到 XML 文档中和从 XML
 
 当client端向server端发送指令[开启接收数据线程]后，server开启接收数据线程然后向client返回消息[成功开启线程]，之后client开启通过 TCP协议与server建立一个长连接进行数据的接收。
 
+## 任务解析
+
+| **任务**                      |                                            |                                |
+| ----------------------------- | ------------------------------------------ | ------------------------------ |
+| **socket通讯模块**            | C#中为server服务端，Python中为client客户端 | `C#`:True,`Python`:underway    |
+| **通讯协议规范**              | 规范各类命令与数据的传输方式和格式         |                                |
+| xml解析模块                   |                                            | `C#`：True，`Python`：underway |
+| C#解析命令                    |                                            | finished                       |
+| Python解析命令                |                                            | wait for start                 |
+| C#配置类的xml序列化与反序列化 |                                            | wait for start                 |
+| Python载入和修改xml           |                                            | underway                       |
+| C#server与驱动库链接          |                                            | finished                       |
+| client人机交互                |                                            | underway                       |
+| **数据解析模块**              |                                            | underway                       |
+
