@@ -3,11 +3,19 @@ import pandas as pd
 import socket
 import gc
 import os
+from globelParameter import dataLock
 from PyQt5.QtCore import QObject,pyqtSignal
 _gain = int.from_bytes(b'\x20\x00',byteorder='big',signed=True) # 8192
 _hit = int.from_bytes(b'\x10\x00',byteorder='big',signed=True) # 4096
 _value = int.from_bytes(b'\x0f\xff',byteorder='big',signed=True) # 4095
-from enum import Enum,unique
+typeList = ["time/LowGain_gain", "time/LowGain_hit", "time/LowGain",
+            "charge/HighGain_gain", "charge/HighGain_hit", "charge/HighGain"]
+chnList = []
+for i in range(0, 36, 1):
+    chnList.append("chn_" + str(i))
+chnList.append("SCAinfo")
+SCAinfoList = ["bounchCrossingID","triggerID","BoardID"]
+#from enum import Enum,unique
 '''
     数据分析模块应分为两种模式：
     1.解析存储的二进制文件：
@@ -41,29 +49,40 @@ from enum import Enum,unique
     3.调用C加速
 '''
 
-@unique
-class DATAMODE(Enum):
-    default = 0
-    bigData = 1
-    smallMemory = 2
-    online = 3
+# @unique
+# class DATAMODE(Enum):
+#     default = 0
+#     bigData = 1
+#     smallMemory = 2
+#     online = 3
 
 class dataAnalyse(QObject):
     receiveSignal = pyqtSignal(int)
     def __init__(self):
         super(dataAnalyse, self).__init__()
-        self._badPackage = 0
-        self._count = 0
-        self._tCount = 0
-        self._temTID = 0
-        self._readSize = 1024*1024
-        self._chnList = []
-        self._typeList = []
-        self.chnList = []
-        self.typeList = ["time/LowGain_gain", "time/LowGain_hit", "time/LowGain",
-                         "charge/HighGain_gain", "charge/HighGain_hit", "charge/HighGain"]
+        # 坏包（扔掉的包）计数
+        self._lenError = 0      # 长度不合适的包
+        self._ChipIDError = 0   # chipID 错误的包
+        # 数据计数
+        self._count = 0     # 接收的包的总数目/当前数据的行数
+        self._tCount = 0    # triggerID重置的次数
+        self._temTID = 0    # 当前包的triggerID
+        # 辅助参数
+        self._readSize = 1024*1024  # 每次读取数据的大小
+        self._threadTag = False     # 数据读取线程开启/关闭标志
+        # 数据相关
+        self._chnList = []  # chn_0~35,SCAinfo
+        self._typeList = [] # low/time:gain,hit,values;high/charge:gain,hit,values;SCAinfo:bcID,triggerID,BoardID
+        self._initIndex()   # 初始化上述两个索引列表
+        self._dataFrame = pd.DataFrame(columns=[self._chnList,self._typeList]) # 数据
+
+
+    def __len__(self):
+        return self._count
+
+    #初始化列索引列表(_chnList和_typeList)
+    def _initIndex(self):
         for i in range(0, 36, 1):
-            self.chnList.append("chn_" + str(i))
             for j in ["time/LowGain", "charge/HighGain"]:
                 self._chnList.append("chn_" + str(i))
                 self._chnList.append("chn_" + str(i))
@@ -77,27 +96,55 @@ class dataAnalyse(QObject):
         self._typeList.append("triggerID")
         self._chnList.append("SCAinfo")
         self._typeList.append("BoardID")
-        self._dataFrame = pd.DataFrame(columns=[self._chnList,self._typeList])
-        self._threadTag = False
 
-    def __len__(self):
-        return self._count
+# ==================返回内部信息的函数=======================
+    #返回以字符串形式的坏包信息，或返回int形式的总坏包数
+    def badPackage(self,ToString: bool = True):
+        if ToString:
+            return "bad package:{}; length error:{},chipID error:{}".format(self._lenError+self._ChipIDError,
+                                                                           self._lenError,self._ChipIDError)
+        else:
+            return self._lenError+self._ChipIDError
 
-    def badPackage(self):
-        return self._badPackage
-
+    #清空当前坏包统计
     def clearBadPackage(self):
-        self._badPackage = 0
+        self._lenError = 0
+        self.ChipIDError = 0
 
+    #返回当前的数据表
     def to_dataFrame(self):
         return self._dataFrame
 
+    #返回当前采集到的事件数
+    def eventCount(self):
+        return self._temTID + self._tCount * 65535
+
+# --------------------------------------------------------
+
+# ======================设置函数============================
+    #设置每次读取数据的大小
     def setReadSize(self,size: int):
         self._readSize = size
 
+    # 停止通过socket接收的任务，将线程标志设置为False
+    def stopSocketRead(self):
+        if self._threadTag:
+            self._threadTag = False
+
+# --------------------------------------------------------
+
+# ==================核心函数===========================
     #load binary data from file/socket
+    #载入数据,解析二进制文件数据时会直到文件解析完毕，而数据源为socket连接时，会一直从socket连接中读取数据，需要调用stopSocketRead
     def load(self,input,**kwargs):
-        self._count = 0
+        '''
+        :param input: 数据源，可以是二进制文件的路径，也可以是一个socket(TCP/IP)连接
+        :param kwargs:
+            filePath-如果要在解析时将解码数据写入文件，可以给出文件路径;
+            source-如果要载入的文件是二进制文件，设置为True(default)，如果要载入txt/csv格式的文件，设置为False;
+            both-从socket连接载入数据时，需要先给出filePath参数，如果想要同时将解码数据载入内存/写入硬盘，则设置为True，如果只要写入硬盘则设置为False;
+        :return:
+        '''
         if kwargs.get("filePath", None) is not None:
             file = open(kwargs.get("filePath"),"w")
             file.write(',' + ','.join(self._chnList) + '\n')
@@ -108,9 +155,15 @@ class dataAnalyse(QObject):
             self.fileSize = os.path.getsize(input)
             self._loadfile(input,source=kwargs.get("source",True),file=file)
         elif isinstance(input,socket.socket):
+            self._threadTag = True
             self._loadsocket(input,file=file,both=kwargs.get("both",True))
+# --------------------------------------------------------
+
+# ===================辅助解包函数============================
+
 
     #auxiliary : search every SSP2E packet and invoking the decode function from file
+    # 辅助函数：从文件中找出每一个符合规则的SSP2E数据包，然后调用_unpackage函数将这个包解析，将数据载入内存/写入硬盘
     def _loadfile(self,path : str,source = True,file: open = None):
         '''
         load data from file ,file can be baniry format file or csv format file.
@@ -118,9 +171,6 @@ class dataAnalyse(QObject):
         :param source:bool,if the file is baniry format,take it as true,the default is true.
         :return: None
         '''
-        self.lenError = 0
-        self.ChipIDError = 0
-        self.TriggerIDError = 0
         #load csv
         if not source:
             self._dataFrame = pd.read_csv(path,index_col=0,header=[0,1])
@@ -132,6 +182,8 @@ class dataAnalyse(QObject):
         tails = 0
         #Compared to the previous code, slightly optimized, reduced the number of changes in the list variables
         while buff != 0:
+            # 寻找包头包尾的位置，如果找不到合适的包头包尾，则会抛出ValueError。
+            # 捕获到ValueError后，从文件中读取一部分数据到缓存区，继续处理，如果文件已经没有更多的数据可读，则结束。
             try:
                 header = buff.index(b'\xfa\x5a', tails)
                 tails = buff.index(b'\xfe\xee', header)
@@ -142,11 +194,9 @@ class dataAnalyse(QObject):
                       "badPackage:{4},lenError:{5},chipIDError:{6},triggerError:{7}".format(
                     pointer,self.fileSize,self._count,pointer/self.fileSize,
                     self._badPackage,self.lenError,self.ChipIDError,self.TriggerIDError,self._temTID+self._tCount*65535
-                ))
-                if self._temTID+self._tCount*65535 < 0:
-                    pass
+                )) # 打印当前解包进度
                 if len(b) == 0:
-                    break
+                    break #
                 buff = buff[tails+3:] + b
                 tails = 0
                 gc.collect()
@@ -155,10 +205,10 @@ class dataAnalyse(QObject):
             if len(buff[header:tails+4]) == 156:
                 self._unpackage(buff[header:tails+4],file=file,both=False)
             else:
-                self._badPackage += 1
                 self.lenError += 1
 
     # auxiliary : search every SS2E packet and invoking the decode function from socket
+    # 辅助函数：从socket连接中找到每一个符合规则的SSP2E数据包，然后调用_unpackage函数将这个包解析，将数据载入内存/写入硬盘
     def _loadsocket(self, s: socket,file: open = None,both = True):
         '''
         会不断的从socket中读取二进制数据，寻找二进制数据中符合条件的包，送入unpackage中进行解包
@@ -179,16 +229,18 @@ class dataAnalyse(QObject):
                     break
                 buff = buff[tails + 3:] + b
                 tails = 0
+                self.receiveSignal.emit(1) # 每载入一次数据将会发送一次信号
                 gc.collect()
                 continue
             # check the length of package is correct
             if len(buff[header:tails + 4]) == 156:
                 self._unpackage(buff[header:tails + 4],file=file,both=both)
-                self.receiveSignal.emit(1)
             else:
                 self._badPackage += 1
+        # 如果是通过threadTag停止循环，将读入剩下的数据
         if not self._threadTag:
             b = s.recv(1024*1024*128)
+            self.receiveSignal.emit(1) # 每载入一次数据将会发送一次信号
             buff = buff[tails + 3:] + b
             tails = 0
             while buff != 0:
@@ -200,7 +252,6 @@ class dataAnalyse(QObject):
                 # check the length of package is correct
                 if len(buff[header:tails + 4]) == 156:
                     self._unpackage(buff[header:tails + 4], file=file,both=both)
-                    self.receiveSignal.emit(1)
                 else:
                     self._badPackage += 1
         if file is not None:
@@ -209,8 +260,7 @@ class dataAnalyse(QObject):
         self.receiveSignal.emit(0)
 
     # auxiliary : decode a SSP2E packet into pd.DataFrame
-    # 辅助函数：解析一个SSP2E数据包，将其返回为
-    # 注意，在使用网口通讯接收的数据包只会含有一个SCA包
+    # 辅助函数：解析一个SSP2E数据包
     def _unpackage(self, source,file: open = None,both = True):
         '''
         THE FOEMAT OF DATA PACKAGE:
@@ -222,17 +272,20 @@ class dataAnalyse(QObject):
         Trigger 1ROW    2Byte   150-151
         TAIL    1ROW    2Byte   152-153
         BoardID 1ROW    2Byte   154-155
+        -------------------------------
+        the length of final data: 219
         ===============================
         :param source:  156Byte
         :param file: if assign a file to this parameter,this function will output the data to the file
-        :return: len = 219
+        :return: bool,when decord successfully will return True,
+                else when chipID is wrong will return False meanwhile chipIDError add one.
         '''
         # check the header and the tail bytes
         if not source[0:2] == b'\xfa\x5a':
             raise ValueError("Packet header does not match.")
         elif not source[152:154] == b'\xfe\xee':
             raise ValueError("Packet tails do not match.")
-        charge = [[], [], []]
+        charge = [[], [], []] # 暂时存储解析后数据的位置
         # Charge/HighGain information and time/LowGain information
         for j in range(36):
             index = j + 1
@@ -252,11 +305,11 @@ class dataAnalyse(QObject):
         data = np.append(data, temp)
         # ChipID ,to make sure the package is not correct.
         ChipID = int.from_bytes(source[148:150], byteorder='big')
-        # triggerID,the same triggerID marks the same event,triggerID will add one every times it trigger,when triggerID adds up to 0xffff,the next triggerID will be 0x0000
-
+        # triggerID,the same triggerID marks the same event,triggerID will add one every times it trigger,
+        # when triggerID adds up to 0xffff,the next triggerID will be 0x0000
         triggerID = int.from_bytes(source[150:152], byteorder='big')
         if self._temTID != 0 and triggerID == 0:
-            self._tCount += 1
+            self._tCount += 1   # 当triggerID置零时，tCount加一
         self._temTID = triggerID
         data = np.append(data,triggerID+self._tCount * 65,535)
         # Verify that the data is correct
@@ -273,11 +326,12 @@ class dataAnalyse(QObject):
                     self._count += 1
                     return True
             #===============
-            self._dataFrame.at[self._dataFrame.index.size] = data
+            dataLock.acquire(timeout=1) # 在多线程中，对数据操作时加锁，防止数据错乱
+            self._dataFrame.at[self._dataFrame.index.size] = data # 将数据载入内存中的数据表中
+            dataLock.release() # 释放锁
             self._count += 1
             return True
         else:
-            self._badPackage = self._badPackage + 1
             self.ChipIDError += 1
             return False
 
