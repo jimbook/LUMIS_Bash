@@ -28,6 +28,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.log = ""
         self.timer = QTimer()
         self.time = QTime()
+        dataStorage.__init__()
         # 单通道能谱
         self.comboBox_singal_tier.addItems(["1","2"])
         self.comboBox_singal_channel.addItems(chnList)
@@ -42,7 +43,7 @@ class window(QMainWindow,Ui_MainWindow):
         #auxiliary event
         self.timer.timeout.connect(self.timeOut_event) #
         self.TCPLink.errorSingal.connect(self.receiveError_event)
-        dataStorage.receiveSignal.connect(self.receiveData_event)
+
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -85,6 +86,8 @@ class window(QMainWindow,Ui_MainWindow):
     def switchReceiveDataThread_event(self,switch: bool):
         if switch:
             self.time.setHMS(0,0,0,0)
+            dataStorage.__init__()  # 让内存中的数据初始化，释放之前采集的数据，也会断开之前的事件信号连接
+            dataStorage.receiveSignal.connect(self.receiveData_event)
             try:
                 self.TCPLink.startReceive()
                 self.timer.start(10)
@@ -93,11 +96,15 @@ class window(QMainWindow,Ui_MainWindow):
                 self.addMessage(e.__str__())
             self.addMessage("开始接收数据")
             self.pushButton_dataReceive.setText("停止接收数据")
+            self.pushButton_config.setDisabled(True)    # 采集时禁止其他通讯方式使用TCP连接，
+            self.pushButton_sendCommand.setDisabled(True)
         else:
             self.TCPLink.stopReceive()
             self.timer.stop()
             self.addMessage("结束数据接收")
             self.pushButton_dataReceive.setText("开始接收数据")
+            self.pushButton_dataReceive.setDisabled(True)
+            self.addMessage("等待将缓存中的数据处理完成，释放socket连接。")
 
     # event: when data receive thread raise Exception,this function will catch it and print it in message queue.
     # 事件：当数据接收线程抛出异常时，将异常信息打印到消息队列中
@@ -107,13 +114,20 @@ class window(QMainWindow,Ui_MainWindow):
         self.timer.stop()
         self.pushButton_dataReceive.setChecked(False)
         self.pushButton_dataReceive.setText("开始接收数据")
+        self.pushButton_sendCommand.setEnabled(True)
+        self.pushButton_config.setEnabled(True)
 
     # evet: when read 0.5MB data,this function will print a message
-    # 事件：每当接收0.5MB数据将会打印一次数据状态
-    def receiveData_event(self):
+    # 事件：每当接收指定大小(100kb)数据将会打印一次数据状态；在结束数据接收后，等待数据接收线程结束信号并进行对应操作。
+    def receiveData_event(self,i: int):
         t = datetime.datetime.now()
         self.addMessage("==={}===\n{}\tevent count{}".format(
             t.strftime("%H:%M:%S"),dataStorage.badPackage(),dataStorage.eventCount()))
+        if i == 0:
+            self.pushButton_sendCommand.setEnabled(True)
+            self.pushButton_config.setEnabled(True)
+            self.pushButton_dataReceive.setEnabled(True)
+            self.addMessage("完成数据接收，socket连接已释放。")
 
     # 事件：添加单通道能谱
     def plotSingalEnergySpectum(self):
@@ -124,6 +138,7 @@ class window(QMainWindow,Ui_MainWindow):
                                   int(self.comboBox_singal_tier.currentText()),self.comboBox_singal_channel.currentText(),
                                   self.checkBox_singal.isChecked())
         dataStorage.receiveSignal.connect(singalEnergryPlot.dataUpdate)
+        singalEnergryPlot.changeBaseLine(self.spinBox_baseLine.value())
         subWin.setWidget(singalEnergryPlot)
         self.mdiArea.addSubWindow(subWin)
         subWin.show()

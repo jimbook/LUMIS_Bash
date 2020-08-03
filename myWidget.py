@@ -40,26 +40,28 @@ class subPlotWin_singal(Ui_Form,QWidget):
         :param HighGain: 是否是高增益
         :return:
         '''
-        dataLock.acquire(timeout=5) # 数据载入时加锁防止错乱
-        self.data = data
-        dataLock.release()
         self.tier = tier
         self.channel = channel
         self.HighGain = HighGain
         #set title
         self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier,channel,"高" if self.HighGain else "低"))
+        dataLock.acquire(timeout=5)  # 数据载入时加锁防止错乱
+        self.data = data
         self.plotUpdate()
+        dataLock.release()
 
     # 更新数据
     def dataUpdate(self,newData: pd.DataFrame = None):
-        if newData is None:
+        if newData is None or newData == 1:
             from linkGBT import dataStorage
             dataLock.acquire(timeout=5)
             self.data = dataStorage.to_dataFrame()
+            self.plotUpdate()
             dataLock.release()
-        else:
+        elif isinstance(newData,pd.DataFrame):
             dataLock.acquire(timeout=5)
             self.data= newData
+            self.plotUpdate()
             dataLock.release()
 
     # 更新图像

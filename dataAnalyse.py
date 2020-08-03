@@ -193,7 +193,7 @@ class dataAnalyse(QObject):
                 print("pointer/fileSize:{0} / {1} \t {3:.2f}\n dataSize:{2};event:{8}\n"
                       "badPackage:{4},lenError:{5},chipIDError:{6},triggerError:{7}".format(
                     pointer,self.fileSize,self._count,pointer/self.fileSize,
-                    self._badPackage,self.lenError,self.ChipIDError,self.TriggerIDError,self._temTID+self._tCount*65535
+                    self.badPackage(False),self.lenError,self.ChipIDError,self.TriggerIDError,self._temTID+self._tCount*65535
                 )) # 打印当前解包进度
                 if len(b) == 0:
                     break #
@@ -236,7 +236,7 @@ class dataAnalyse(QObject):
             if len(buff[header:tails + 4]) == 156:
                 self._unpackage(buff[header:tails + 4],file=file,both=both)
             else:
-                self._badPackage += 1
+                self._lenError += 1
         # 如果是通过threadTag停止循环，将读入剩下的数据
         if not self._threadTag:
             b = s.recv(1024*1024*128)
@@ -253,7 +253,7 @@ class dataAnalyse(QObject):
                 if len(buff[header:tails + 4]) == 156:
                     self._unpackage(buff[header:tails + 4], file=file,both=both)
                 else:
-                    self._badPackage += 1
+                    self._ChipIDError += 1
         if file is not None:
             file.close()
         gc.collect()

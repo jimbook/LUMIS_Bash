@@ -209,7 +209,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>329</height>
+          <height>276</height>
          </rect>
         </property>
         <attribute name="label">
@@ -261,6 +261,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="spinBox_baseLine">
+                <property name="minimum">
+                 <number>435</number>
+                </property>
                 <property name="maximum">
                  <number>4095</number>
                 </property>

@@ -40,7 +40,7 @@ class linkGBT(QObject):
             if not os.path.exists(os.path.join(".\\data",dateToday)):
                 os.makedirs(os.path.join(".\\data",dateToday))
             filePath = os.path.join(".\\data",dateToday,timeNow+"_tempData.txt")
-            dataStorage.__init__()
+            #dataStorage.__init__()
             dataStorage.setReadSize(1024*100) # 设置每次接收100KB的数据
             dataStorage.load(self.TCPLink,filePath=filePath) # 这里会阻塞，直到调用结束读取socket的函数
             print("recevie all data,now end recevie.")
