@@ -337,4 +337,4 @@ class dataAnalyse(QObject):
 
 if __name__ == "__main__":
     myTrack = dataAnalyse()
-    myTrack.load("C:\\Users\\jimbook\\Desktop\\20200726_2202_dac300.dat",filePath=".\\data\\mydata.txt")
+    myTrack.load("C:\\Users\\jimbook\\Desktop\\20200726_2202_dac300.dat", filePath="data/2020_08_03/mydata.txt")

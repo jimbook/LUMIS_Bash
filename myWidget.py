@@ -68,8 +68,7 @@ class subPlotWin_singal(Ui_Form,QWidget):
     def plotUpdate(self):
         high = "charge/HighGain" if self.HighGain else "time/LowGain"
         data = self.data[self.channel][high]
-        index =np.equal(self.data["SCAinfo"]["BoardID"] == self.tier,
-                        self.data[self.channel][high + "_hit"] == 1)
+        index =(self.data["SCAinfo"]["BoardID"] == self.tier)&(self.data[self.channel][high + "_hit"] == 1)
         self._d = data.values[index]
         d = self._d[self._d >= self.spinBox_baseLine.value()]
         y,x = np.histogram(d,bins=np.linspace(0, 2 ** 12, 2 ** 12))
@@ -90,8 +89,8 @@ class subPlotWin_singal(Ui_Form,QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    data =pd.read_csv(".\\data\\mydata.txt",sep=',',header=[0,1],index_col=0)
+    data =pd.read_csv(".\\data\\2020_08_06\\132632_tempData.txt", sep=',', header=[0, 1], index_col=0)
     ex = subPlotWin_singal()
-    ex.setData(data,1,"chn_12",False)
+    ex.setData(data,2,"chn_2",False)
     ex.show()
     sys.exit(app.exec_())
