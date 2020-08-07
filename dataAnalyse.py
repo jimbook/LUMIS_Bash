@@ -1,9 +1,12 @@
+import time
 import numpy as np
 import pandas as pd
 import socket
 import gc
 import os
-from globelParameter import dataLock
+from datetime import datetime
+from threading import Lock,Event
+from multiprocessing import SimpleQueue
 from PyQt5.QtCore import QObject,pyqtSignal
 _gain = int.from_bytes(b'\x20\x00',byteorder='big',signed=True) # 8192
 _hit = int.from_bytes(b'\x10\x00',byteorder='big',signed=True) # 4096
@@ -15,7 +18,6 @@ for i in range(0, 36, 1):
     chnList.append("chn_" + str(i))
 chnList.append("SCAinfo")
 SCAinfoList = ["bounchCrossingID","triggerID","BoardID"]
-#from enum import Enum,unique
 '''
     数据分析模块应分为两种模式：
     1.解析存储的二进制文件：
@@ -49,17 +51,10 @@ SCAinfoList = ["bounchCrossingID","triggerID","BoardID"]
     3.调用C加速
 '''
 
-# @unique
-# class DATAMODE(Enum):
-#     default = 0
-#     bigData = 1
-#     smallMemory = 2
-#     online = 3
-
 class dataAnalyse(QObject):
     receiveSignal = pyqtSignal(int)
-    def __init__(self):
-        super(dataAnalyse, self).__init__()
+    def __init__(self,*args,lock: Lock = Lock(),tag: Event = Event()):
+        super(dataAnalyse, self).__init__(*args)
         # 坏包（扔掉的包）计数
         self._lenError = 0      # 长度不合适的包
         self._ChipIDError = 0   # chipID 错误的包
@@ -69,11 +64,11 @@ class dataAnalyse(QObject):
         self._temTID = 0    # 当前包的triggerID
         # 辅助参数
         self._readSize = 1024*1024  # 每次读取数据的大小
-        self._threadTag = False     # 数据读取线程开启/关闭标志
-        # 数据相关
+        self._threadTag = tag     # 数据读取线程开启/关闭标志
+        self._threadlock = lock     # 线程锁，防止数据错乱
         self._chnList = []  # chn_0~35,SCAinfo
-        self._typeList = [] # low/time:gain,hit,values;high/charge:gain,hit,values;SCAinfo:bcID,triggerID,BoardID
-        self._initIndex()   # 初始化上述两个索引列表
+        self._typeList = []  # low/time:gain,hit,values;high/charge:gain,hit,values;SCAinfo:bcID,triggerID,BoardID
+        self._initIndex()  # 初始化上述两个索引列表
         self._dataFrame = pd.DataFrame(columns=[self._chnList,self._typeList]) # 数据
 
 
@@ -128,8 +123,8 @@ class dataAnalyse(QObject):
 
     # 停止通过socket接收的任务，将线程标志设置为False
     def stopSocketRead(self):
-        if self._threadTag:
-            self._threadTag = False
+        if self._threadTag.is_set():
+            self._threadTag.clear()
 
 # --------------------------------------------------------
 
@@ -155,7 +150,7 @@ class dataAnalyse(QObject):
             self.fileSize = os.path.getsize(input)
             self._loadfile(input,source=kwargs.get("source",True),file=file)
         elif isinstance(input,socket.socket):
-            self._threadTag = True
+            self._threadTag.set()
             self._loadsocket(input,file=file,both=kwargs.get("both",True))
 # --------------------------------------------------------
 
@@ -219,7 +214,7 @@ class dataAnalyse(QObject):
         '''
         buff = s.recv(self._readSize)
         tails = 0
-        while buff != 0 and self._threadTag:
+        while buff != 0 and self._threadTag.is_set():
             try:
                 header = buff.index(b'\xfa\x5a', tails)
                 tails = buff.index(b'\xfe\xee', header)
@@ -238,7 +233,7 @@ class dataAnalyse(QObject):
             else:
                 self._lenError += 1
         # 如果是通过threadTag停止循环，将读入剩下的数据
-        if not self._threadTag:
+        if not self._threadTag.is_set():
             b = s.recv(1024*1024*128)
             self.receiveSignal.emit(1) # 每载入一次数据将会发送一次信号
             buff = buff[tails + 3:] + b
@@ -326,14 +321,16 @@ class dataAnalyse(QObject):
                     self._count += 1
                     return True
             #===============
-            dataLock.acquire(timeout=1) # 在多线程中，对数据操作时加锁，防止数据错乱
+            self._threadlock.acquire(timeout=1) # 在多线程中，对数据操作时加锁，防止数据错乱
             self._dataFrame.at[self._dataFrame.index.size] = data # 将数据载入内存中的数据表中
-            dataLock.release() # 释放锁
+            self._threadlock.release() # 释放锁
             self._count += 1
             return True
         else:
             self.ChipIDError += 1
             return False
+
+
 
 if __name__ == "__main__":
     myTrack = dataAnalyse()

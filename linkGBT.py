@@ -3,32 +3,29 @@ import pandas as pd
 import socket
 import os
 from threading import Thread
+from multiprocessing import SimpleQueue
 from datetime import datetime
-from globelParameter import dataLock
 from dataAnalyse import dataAnalyse
 from PyQt5.QtCore import QObject,pyqtSignal
 
-# dataAnalyse-数据对象
-dataStorage = dataAnalyse()
-
 # 集合连接通讯操作的函数
-class linkGBT(QObject):
+class linkGBT(object):
     _devIP = '192.168.10.16'
     _TCPport = 24
     _UDPport = 4660
     errorSingal = pyqtSignal(str)
-    def __init__(self,*args):
+    def __init__(self,*args,dataStorage :dataAnalyse,messageQueue :SimpleQueue):
         super(linkGBT, self).__init__(*args)
-        global dataStorage
+        self.dataStorage = dataStorage
+        self.messageQueue = messageQueue
         self.TCPLink = socket.socket()
-        self._threadTag = False
 
     # start receive data threading
     # 开启数据接收线程
     def startReceive(self):
         self.recvThread = Thread(target=self._receiveThread)
         self.recvThread.start()
-        print("start receive data.")
+        self.messageQueue.put("开始接收数据")
 
     # receive data thread
     def _receiveThread(self):
@@ -40,20 +37,19 @@ class linkGBT(QObject):
             if not os.path.exists(os.path.join(".\\data",dateToday)):
                 os.makedirs(os.path.join(".\\data",dateToday))
             filePath = os.path.join(".\\data",dateToday,timeNow+"_tempData.txt")
-            #dataStorage.__init__()
-            dataStorage.setReadSize(1024*100) # 设置每次接收100KB的数据
-            dataStorage.load(self.TCPLink,filePath=filePath) # 这里会阻塞，直到调用结束读取socket的函数
-            print("recevie all data,now end recevie.")
+            self.dataStorage.setReadSize(1024*100) # 设置每次接收100KB的数据
+            self.dataStorage.load(self.TCPLink,filePath=filePath) # 这里会阻塞，直到调用结束读取socket的函数
+            self.messageQueue.put("数据接收结束")
             self.TCPLink.close()
         except Exception as e:
-            self.errorSingal.emit(e.__str__())
-
+            self.messageQueue.put(e.__str__())
 
     # stop data receive threading
     # 停止接收数据
     def stopReceive(self):
         self.TCPLink.send(b'\xff\x01')
-        dataStorage.stopSocketRead()
+        self.dataStorage.stopSocketRead()
+        self.messageQueue.put("数据接收结束")
 
 
     # send a short binary command
@@ -87,6 +83,8 @@ class linkGBT(QObject):
             import traceback
             traceback.print_exc()
             return False,e.__str__()
+
+
 
 if __name__ == "__main__":
     import pyqtgraph.examples

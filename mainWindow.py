@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 import os,sys,socket,time,gc,datetime
 import threading
-from dataAnalyse import *
-from linkGBT import linkGBT,dataStorage
+from globelParameter import dataChannel
+from dataAnalyse import chnList
+from linkGBT import linkGBT
 from myWidget import subPlotWin_singal
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -12,9 +13,7 @@ from PyQt5.QtWidgets import *
 from UI.mainWindow import Ui_MainWindow
 #
 class window(QMainWindow,Ui_MainWindow):
-    updata = 0
-    recvdata = 0
-    _recvLen = 1024*512
+    updateSingal = pyqtSignal()
     def __init__(self,*args):
         super(window, self).__init__(*args)
         self.setupUi(self)
@@ -28,11 +27,14 @@ class window(QMainWindow,Ui_MainWindow):
         self.log = ""
         self.timer = QTimer()
         self.time = QTime()
-        dataStorage.__init__()
+        #从数据服务端获取共享对象
+        self.dataChn = dataChannel()
         # 单通道能谱
         self.comboBox_singal_tier.addItems(["1","2"])
         self.comboBox_singal_channel.addItems(chnList)
-
+        # 开启从数据服务进程接收数据的服务
+        t = threading.Thread(target=self.getMessge)
+        t.start()
 
     def setEvent(self):
         #communication event
@@ -42,7 +44,6 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum)
         #auxiliary event
         self.timer.timeout.connect(self.timeOut_event) #
-        self.TCPLink.errorSingal.connect(self.receiveError_event)
 
 
     # init: load config file index
@@ -86,58 +87,37 @@ class window(QMainWindow,Ui_MainWindow):
     def switchReceiveDataThread_event(self,switch: bool):
         if switch:
             self.time.setHMS(0,0,0,0)
-            dataStorage.__init__()  # 让内存中的数据初始化，释放之前采集的数据，也会断开之前的事件信号连接
-            dataStorage.receiveSignal.connect(self.receiveData_event)
-            try:
-                self.TCPLink.startReceive()
-                self.timer.start(10)
-            except Exception as e:
-                self.addMessage("无法启动接收数据")
-                self.addMessage(e.__str__())
-            self.addMessage("开始接收数据")
+            self.dataChn.threadTag.set()
             self.pushButton_dataReceive.setText("停止接收数据")
             self.pushButton_config.setDisabled(True)    # 采集时禁止其他通讯方式使用TCP连接，
             self.pushButton_sendCommand.setDisabled(True)
         else:
-            self.TCPLink.stopReceive()
+            self.dataChn.threadTag.clear()
             self.timer.stop()
-            self.addMessage("结束数据接收")
             self.pushButton_dataReceive.setText("开始接收数据")
             self.pushButton_dataReceive.setDisabled(True)
             self.addMessage("等待将缓存中的数据处理完成，释放socket连接。")
 
-    # event: when data receive thread raise Exception,this function will catch it and print it in message queue.
-    # 事件：当数据接收线程抛出异常时，将异常信息打印到消息队列中
-    def receiveError_event(self,message: str):
-        self.addMessage("接收数据时遇到意外：")
-        self.addMessage(message)
-        self.timer.stop()
-        self.pushButton_dataReceive.setChecked(False)
-        self.pushButton_dataReceive.setText("开始接收数据")
-        self.pushButton_sendCommand.setEnabled(True)
-        self.pushButton_config.setEnabled(True)
-
-    # evet: when read 0.5MB data,this function will print a message
-    # 事件：每当接收指定大小(100kb)数据将会打印一次数据状态；在结束数据接收后，等待数据接收线程结束信号并进行对应操作。
-    def receiveData_event(self,i: int):
-        t = datetime.datetime.now()
-        self.addMessage("==={}===\n{}\tevent count{}".format(
-            t.strftime("%H:%M:%S"),dataStorage.badPackage(),dataStorage.eventCount()))
-        if i == 0:
-            self.pushButton_sendCommand.setEnabled(True)
-            self.pushButton_config.setEnabled(True)
-            self.pushButton_dataReceive.setEnabled(True)
-            self.addMessage("完成数据接收，socket连接已释放。")
+    #辅助函数：获取从数据服务中获取的消息，同时根据数据服务进程的状态使按钮可用
+    def getMessge(self):
+        while self:
+            msg = self.dataChn.mq.get()
+            self.addMessage(msg)
+            if self.dataChn.dataTag.is_set(): # 如果此时数据接收已经结束，让配置/开始接收数据按钮可用
+                self.pushButton_sendCommand.setEnabled(True)
+                self.pushButton_config.setEnabled(True)
+                self.pushButton_dataReceive.setEnabled(True)
+            else:       # 如果此时在接收数据，发送更新数据的指令
+                self.updateSingal.emit()
 
     # 事件：添加单通道能谱
     def plotSingalEnergySpectum(self):
         subWin = QMdiSubWindow()
         subWin.setAttribute(Qt.WA_DeleteOnClose)
         singalEnergryPlot = subPlotWin_singal()
-        singalEnergryPlot.setData(dataStorage.to_dataFrame(),
+        singalEnergryPlot.setData(self.dataChn.dataStorage,
                                   int(self.comboBox_singal_tier.currentText()),self.comboBox_singal_channel.currentText(),
                                   self.checkBox_singal.isChecked())
-        dataStorage.receiveSignal.connect(singalEnergryPlot.dataUpdate)
         singalEnergryPlot.changeBaseLine(self.spinBox_baseLine.value())
         subWin.setWidget(singalEnergryPlot)
         self.mdiArea.addSubWindow(subWin)
@@ -157,8 +137,25 @@ class window(QMainWindow,Ui_MainWindow):
         self.textBrowser_messageQueue.setText(self.log)
         self.textBrowser_messageQueue.moveCursor(QTextCursor.End) # 设置自动滚动到底部
 
-
-
+    # 重载函数：关闭界面-会弹出提示框，同时结束数据接收服务
+    def close(self) -> bool:
+        if not self.dataChn.dataTag.is_set():
+            if QMessageBox.information(self,"关闭界面","数据接收仍在进行，是否确认关闭？确认后将等待数据接收服务结束后关闭。",
+                                       QMessageBox.Yes|QMessageBox.No):
+                self.dataChn.processTag.clear()
+                self.dataChn.threadTag.clear()
+                self.dataChn.dataTag.wait()
+                super(window, self).close()
+                return True
+            else:
+                return False
+        else:
+            if QMessageBox.information(self,"关闭界面","是否确认关闭？确认后将等待数据接收服务结束后关闭。",
+                                       QMessageBox.Yes|QMessageBox.No):
+                self.dataChn.processTag.clear()
+                self.dataChn.threadTag.set()
+                super(window, self).close()
+                return True
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
