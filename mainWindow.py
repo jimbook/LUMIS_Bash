@@ -14,21 +14,21 @@ from UI.mainWindow import Ui_MainWindow
 #
 class window(QMainWindow,Ui_MainWindow):
     updateSingal = pyqtSignal()
-    def __init__(self,*args):
+    messageSingal = pyqtSignal(str)
+    def __init__(self,*args,manager = None):
         super(window, self).__init__(*args)
         self.setupUi(self)
         self.retranslateUi(self)
-        self.setMore()
+        self.setMore(manager)
         self.setEvent()
 
-    def setMore(self):
+    def setMore(self,manager):
         self.init_loadConfigIndex()
-        self.TCPLink = linkGBT()
         self.log = ""
         self.timer = QTimer()
         self.time = QTime()
         #从数据服务端获取共享对象
-        self.dataChn = dataChannel()
+        self.dataChn = dataChannel(manager)
         # 单通道能谱
         self.comboBox_singal_tier.addItems(["1","2"])
         self.comboBox_singal_channel.addItems(chnList)
@@ -44,7 +44,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum)
         #auxiliary event
         self.timer.timeout.connect(self.timeOut_event) #
-
+        self.messageSingal.connect(self.addMessage) # 当读取消息队列线程获取到数据时
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -86,8 +86,9 @@ class window(QMainWindow,Ui_MainWindow):
     # 事件：开启/结束数据接收线程，同时会显示测量时间
     def switchReceiveDataThread_event(self,switch: bool):
         if switch:
-            self.time.setHMS(0,0,0,0)
             self.dataChn.threadTag.set()
+            self.time.setHMS(0, 0, 0, 0)
+            self.timer.start(10)
             self.pushButton_dataReceive.setText("停止接收数据")
             self.pushButton_config.setDisabled(True)    # 采集时禁止其他通讯方式使用TCP连接，
             self.pushButton_sendCommand.setDisabled(True)
@@ -100,13 +101,14 @@ class window(QMainWindow,Ui_MainWindow):
 
     #辅助函数：获取从数据服务中获取的消息，同时根据数据服务进程的状态使按钮可用
     def getMessge(self):
-        while self:
+        while True:
             msg = self.dataChn.mq.get()
-            self.addMessage(msg)
+            self.messageSingal.emit(msg)
             if self.dataChn.dataTag.is_set(): # 如果此时数据接收已经结束，让配置/开始接收数据按钮可用
                 self.pushButton_sendCommand.setEnabled(True)
                 self.pushButton_config.setEnabled(True)
                 self.pushButton_dataReceive.setEnabled(True)
+                self.timer.stop()
             else:       # 如果此时在接收数据，发送更新数据的指令
                 self.updateSingal.emit()
 
@@ -134,7 +136,7 @@ class window(QMainWindow,Ui_MainWindow):
     # 辅助函数：向消息队列中添加消息
     def addMessage(self,inputMessage: str):
         self.log += inputMessage+'\n'
-        self.textBrowser_messageQueue.setText(self.log)
+        self.textBrowser_messageQueue.setPlainText(self.log)
         self.textBrowser_messageQueue.moveCursor(QTextCursor.End) # 设置自动滚动到底部
 
     # 重载函数：关闭界面-会弹出提示框，同时结束数据接收服务
@@ -156,10 +158,3 @@ class window(QMainWindow,Ui_MainWindow):
                 self.dataChn.threadTag.set()
                 super(window, self).close()
                 return True
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = window()
-    # dataStorage._loadfile(".\\data\\mydata.txt",source=False)
-    ex.show()
-    sys.exit(app.exec_())

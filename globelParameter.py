@@ -85,7 +85,7 @@ class unpack(object):
         self._tCount = 0  # triggerID重置的次数
         self._temTID = 0  # 当前包的triggerID
         # 辅助参数
-        self._readSize = 1024 * 1024  # 每次读取数据的大小
+        self._readSize = 1024 * 100  # 每次读取数据的大小
         self._threadTag = tag  # 标志线程是否应该结束
         self._messageQueue = message_queue  # 用于向GUI发送消息
         self._sock = socket.socket()  # 连接
@@ -112,7 +112,9 @@ class unpack(object):
 
     # 返回当前采集到的事件数
     def eventCount(self):
-        return self._temTID + self._tCount * 65535
+        return self._count
+        # return self._temTID + self._tCount * 65535
+
 
     # --------------------------------------------------------
 
@@ -130,11 +132,11 @@ class unpack(object):
             today = datetime.now().strftime("%Y_%m_%d")
             nowTime = datetime.now().strftime("%H%M%S")
             start_time = time.time()
-            self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))) # 记录开始时间
             if not os.path.exists(os.path.join(".\\data", today)):
                 os.makedirs(os.path.join(".\\data", today))
             self._fileDir = os.path.join(".\\data", today, nowTime + "data")
             os.makedirs(self._fileDir)  # 创建数据存储文件夹
+            self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))  # 记录开始时间
             self._loadsocket()
             end_time = time.time()
             self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
@@ -166,8 +168,8 @@ class unpack(object):
                 # 如果没有数据可读，则退出循环
                 if len(b) == 0:
                     break
-                # 如果文件数据大于128MB，则开启一个新的文件，并清除共享内存中的数据
-                if os.path.getsize(filePath) >= 1024 * 1024 * 128:
+                # 如果文件数据大于32MB，则开启一个新的文件，并清除共享内存中的数据
+                if os.path.getsize(filePath) >= 1024 * 1024 * 32:
                     file.close()
                     filePath = os.path.join(self._fileDir,
                                             "tempData_{}.txt".format(len(self._dataStorage.get_diskData())))
@@ -185,6 +187,7 @@ class unpack(object):
             else:
                 self._lenError += 1
         # 如果是通过threadTag停止循环，将读入剩下的数据
+        '''
         if not self._threadTag.is_set():
             self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
             self._messageQueue.put("已发送停止传输数据命令，等待处理缓存区数据")
@@ -205,6 +208,10 @@ class unpack(object):
                     self._unpackage(buff[header:tails + 4], file=file)
                 else:
                     self._ChipIDError += 1
+        '''
+        # 为快速停止线程,不再读取余下数据，发送停止命令后直接结束
+        self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
+        self._messageQueue.put("已发送停止传输数据命令，正在退出线程")
         file.close()
         gc.collect()
 

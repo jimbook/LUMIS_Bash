@@ -1,6 +1,7 @@
 import pyqtgraph as pg
 import os,sys
 import gc
+import copy
 import pandas as pd
 import numpy as np
 from PyQt5.QtWidgets import QWidget,QApplication
@@ -51,15 +52,47 @@ class subPlotWin_singal(Ui_Form,QWidget):
         #set title
         self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier,channel,"高" if HighGain else "低"))
         self.data = data
+        self.dataUpdate()
+
+    # 模块测试用
+    def _setData(self,data: dataStorage,tier: int,channel: str,HighGain: bool):
+        '''
+        :param data: 数据
+        :param tier: 层数
+        :param channel: 通道
+        :param HighGain: 是否是高增益
+        :return:
+        '''
+        self.tier = tier
+        self.channel = channel
+        self.HighGain = "charge/HighGain" if HighGain else "time/LowGain"
+        self.index_disk = 0
+        self.index_memory = 0
+        self.energy_data_disk = None
+        self.energy_data_memory = None
+        self.bars = None
+        #set title
+        self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier,channel,"高" if HighGain else "低"))
+        self.data = data
+        self._dataUpdate()
+
+    # 模块测试用
+    def _dataUpdate(self):
+        # 读取内存中的数据
+        listOfData = self.data
+        npOfData = np.array(listOfData)
+        frameOfData = pd.DataFrame(npOfData,columns=[_chnList, _typeList])
+        self.energy_data_memory, self.bars = self.selectData(frameOfData)
         self.plotUpdate()
+        gc.collect()
 
     # 辅助函数：将目标采集板和通道上被触发的数据筛选出来,然后通过函数np.histogram转化为直方图坐标x,y
     def selectData(self,d: pd.DataFrame):
         _d = d[self.channel][self.HighGain]
-        index = (self.data["SCAinfo"]["BoardID"] == self.tier)&(self.data[self.channel][self.HighGain + "_hit"] == 1)
+        index = (d["SCAinfo"]["BoardID"] == self.tier)&(d[self.channel][self.HighGain + "_hit"] == 1)
         _d = _d.values[index]  # 将目标板子和通道已触发的数据筛选出
-        y, x = np.histogram(d, bins=np.linspace(0, 2 ** 12, 2 ** 12))
-        return [x,y]
+        y, x = np.histogram(_d, bins=np.linspace(0, 2 ** 12, 2 ** 12))
+        return y,x
 
     # 更新数据
     def dataUpdate(self):
@@ -100,8 +133,11 @@ class subPlotWin_singal(Ui_Form,QWidget):
 
     # 更新图像
     def plotUpdate(self):
-        y = self.energy_data_disk + self.energy_data_memory
-        np.place(y,self.bars[-1] < self.spinBox_baseLine.value(),[0])
+        if self.energy_data_disk is not None:
+            y = copy.copy(self.energy_data_disk + self.energy_data_memory)
+        else:
+            y = copy.copy(self.energy_data_memory)
+        np.place(y,self.bars[:-1] < self.spinBox_baseLine.value(),[0])
         self.label_count.setText(str(np.sum(y)))
         self.plotDataItem.setData(self.bars,y,stepMode=True, fillLevel=0, fillOutline=False, brush=(0,0,255,150),
                                   pen = pg.mkPen((0,0,255,150)))
@@ -112,10 +148,12 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.horizontalSlider_baseLine.setValue(new)
         self.plotUpdate()
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     data =pd.read_csv(".\\data\\mydata.txt",sep=',',header=[0,1],index_col=0)
+    d1 = data.values.tolist()
     ex = subPlotWin_singal()
-    ex.setData(data,1,"chn_12",False)
+    ex._setData(d1,1,"chn_12",False)
     ex.show()
     sys.exit(app.exec_())
