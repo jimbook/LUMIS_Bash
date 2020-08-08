@@ -16,8 +16,6 @@ class linkGBT(object):
     errorSingal = pyqtSignal(str)
     def __init__(self,*args,dataStorage :dataAnalyse,messageQueue :SimpleQueue):
         super(linkGBT, self).__init__(*args)
-        self.dataStorage = dataStorage
-        self.messageQueue = messageQueue
         self.TCPLink = socket.socket()
 
     # start receive data threading

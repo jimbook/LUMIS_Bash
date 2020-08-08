@@ -112,9 +112,8 @@ class unpack(object):
 
     # 返回当前采集到的事件数
     def eventCount(self):
+        #return self._temTID + self._tCount * 65535
         return self._count
-        # return self._temTID + self._tCount * 65535
-
 
     # --------------------------------------------------------
 
@@ -128,35 +127,45 @@ class unpack(object):
         try:
             self._sock.connect((self._devIP, self._TCPport))
             self._sock.send(b'\xff\x00')    # 发送命令，开始接收数据
-            self._messageQueue.put("成功连接到设备")
+            self._messageQueue.put("TCP connect successfuly")
+            print("成功连接到设备")
             today = datetime.now().strftime("%Y_%m_%d")
             nowTime = datetime.now().strftime("%H%M%S")
             start_time = time.time()
             if not os.path.exists(os.path.join(".\\data", today)):
                 os.makedirs(os.path.join(".\\data", today))
-            self._fileDir = os.path.join(".\\data", today, nowTime + "data")
+            self._fileDir = os.path.join(".\\data", today, nowTime + "_data")
             os.makedirs(self._fileDir)  # 创建数据存储文件夹
             self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))  # 记录开始时间
+            print("新建文件夹")
             self._loadsocket()
             end_time = time.time()
             self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             self._addInfoToDisk("total time: {} sec".format(start_time - end_time))
-            self._messageQueue.put("数据接收已停止,总耗时：{}".format(start_time - end_time))
+            self._messageQueue.put("the total time consuming:{}".format(start_time - end_time))
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             self._threadTag.clear()
-            self._messageQueue.put("数据接收时遇到意外：\n" + e.__str__())
+            self._messageQueue.put("an exception occurred while receiving data:\n" + e.__str__())
 
     # auxiliary : search every SS2E packet and invoking the decode function from socket
     # 辅助函数：从socket连接中找到每一个符合规则的SSP2E数据包，然后调用_unpackage函数将这个包解析，将数据载入内存/写入硬盘
     def _loadsocket(self):
         # 添加硬盘文件的路径
-        filePath = os.path.join(self._fileDir, "tempData_{}.txt".format(len(self._dataStorage.diskData)))
+        filePath = os.path.join(self._fileDir, "tempData_{}.txt".format(len(self._dataStorage.get_diskData())))
         self._dataStorage.resetMeoryData(filePath)
         file = open(filePath, "w")
+        file.write(',' + ','.join(_chnList) + '\n')
+        file.write(',' + ','.join(_typeList) + '\n')
+        print("开始读取数据")
         # 开始读取数据
         buff = self._sock.recv(self._readSize)
         tails = 0
+        print(self._threadTag.is_set())
         while buff != 0 and self._threadTag.is_set():
+            print("===={}====\nevent count:{}\n{}".format(
+                        datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))
             try:
                 header = buff.index(b'\xfa\x5a', tails)
                 tails = buff.index(b'\xfe\xee', header)
@@ -175,6 +184,8 @@ class unpack(object):
                                             "tempData_{}.txt".format(len(self._dataStorage.get_diskData())))
                     self._dataStorage.resetMeoryData(filePath)
                     file = open(filePath, "w")
+                    file.write(',' + ','.join(self._chnList) + '\n')
+                    file.write(',' + ','.join(self._typeList) + '\n')
                 # 将新读入的数据添加到缓存区，并把之前已读的数据清除，同时将包尾的索引清零
                 buff = buff[tails + 3:] + b
                 tails = 0
@@ -187,31 +198,28 @@ class unpack(object):
             else:
                 self._lenError += 1
         # 如果是通过threadTag停止循环，将读入剩下的数据
-        '''
-        if not self._threadTag.is_set():
-            self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
-            self._messageQueue.put("已发送停止传输数据命令，等待处理缓存区数据")
-            b = self._sock.recv(1024 * 1024 * 128)  # 读入剩余数据
-            self._messageQueue.put(
-                "===={}====\nevent count:{}\n{}".format(
-                    datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))  # 每载入一次数据将会发送一次信号
-            buff = buff[tails + 3:] + b
-            tails = 0
-            while buff != 0:
-                try:
-                    header = buff.index(b'\xfa\x5a', tails)
-                    tails = buff.index(b'\xfe\xee', header)
-                except ValueError:
-                    break
-                # check the length of package is correct
-                if len(buff[header:tails + 4]) == 156:
-                    self._unpackage(buff[header:tails + 4], file=file)
-                else:
-                    self._ChipIDError += 1
-        '''
-        # 为快速停止线程,不再读取余下数据，发送停止命令后直接结束
+        # if not self._threadTag.is_set():
+        #     self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
+        #     self._messageQueue.put("stop command has sent,waiting for the cached data to be processed.")
+        #     b = self._sock.recv(1024 * 1024 * 128)  # 读入剩余数据
+        #     self._messageQueue.put(
+        #         "===={}====\nevent count:{}\n{}".format(
+        #             datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))  # 每载入一次数据将会发送一次信号
+        #     buff = buff[tails + 3:] + b
+        #     tails = 0
+        #     while buff != 0:
+        #         try:
+        #             header = buff.index(b'\xfa\x5a', tails)
+        #             tails = buff.index(b'\xfe\xee', header)
+        #         except ValueError:
+        #             break
+        #         # check the length of package is correct
+        #         if len(buff[header:tails + 4]) == 156:
+        #             self._unpackage(buff[header:tails + 4], file=file)
+        #         else:
+        #             self._ChipIDError += 1
         self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
-        self._messageQueue.put("已发送停止传输数据命令，正在退出线程")
+        self._messageQueue.put("stop command has sent,waiting for the cached data to be processed.")
         file.close()
         gc.collect()
 
@@ -277,7 +285,7 @@ class unpack(object):
             file.write(string)
             file.write('\n')
             # ===============
-            self._dataStorage.addMeoryData(data.values)
+            self._dataStorage.addMeoryData(data.tolist())
             self._count += 1
             return True
         else:
@@ -294,16 +302,19 @@ class unpack(object):
 # 数据接收进程
 def dataReceiveServer(d: dataStorage,tag: Event,dataTag: Event,processTag: Event,messageQueue: SimpleQueue):
     data_unpack = unpack(message_queue=messageQueue,tag=tag,data_storage=d)
-    while processTag.set():
+    while processTag.is_set():
         tag.wait()  # 等待开启数据接收线程
-        if not processTag.set():
+        print("开启数据接收")
+        if not processTag.is_set():
             break
         dataTag.clear() # 表示数据接收线程正在运行
-        messageQueue.put("开启数据接收")
+        messageQueue.put("data receive start")
         data_unpack.load() # 开始接收和解析数据，会阻塞直到数据接收结束
         dataTag.set() # 表示数据接收已经停止
-        messageQueue.put("数据接收停止")
-    messageQueue.put("数据服务进程已退出")
+        messageQueue.put("data receive stop")
+        print("数据接收停止")
+    messageQueue.put("data server end")
+    print("数据服务进程已退出")
 
 # ==========共享内存相关===========
 class DataManager(BaseManager): # 共享内存管理器
@@ -332,9 +343,12 @@ DataManager.register("get_messageQueue",callable=get_messageQueue)
 
 #从共享数据服务中获取数据
 class dataChannel(object):
-    def __init__(self):
-        m = DataManager(address=_address,authkey=_authkey)
-        m.connect()
+    def __init__(self,manager: BaseManager = None):
+        if manager is None:
+            m = DataManager(address=_address,authkey=_authkey)
+            m.connect()
+        else:
+            m = manager
         # 获取共享数据
         self.dataStorage = m.get_shareData()
         self.threadTag = m.get_threadTag()
@@ -363,12 +377,22 @@ class dataChannel(object):
         self._chnList.append("SCAinfo")
         self._typeList.append("BoardID")
 
+    def startReceiveData(self):
+        self.threadTag.set()
+
+    def stopReceiveData(self):
+        self.threadTag.clear()
+
+    def getMessage(self):
+        msg = self.mq.get()
+        return msg
 def reM():
     drm = DataManager(address=_address,authkey=_authkey)
     drm.connect()
     mq = drm.get_messageQueue()
     while True:
         print(mq.get())
+
 def DR():
     drm = DataManager(address=_address,authkey=_authkey)
     drm.connect()
@@ -377,19 +401,27 @@ def DR():
     _dTag = drm.get_dataTag()
     _pTag = drm.get_processTag()
     _mq = drm.get_messageQueue()
-    _tag.set()
+    _tag.clear()
     _pTag.set()
     _dTag.set()
-    print("开始计数")
+    print("开始计数",)
     dataReceiveServer(_d,_tag,_dTag,_pTag,_mq)
 
 
 if __name__ is "__main__":
+    import time
     m = DataManager(address=_address,authkey=_authkey)
     m.start()
     p1 = Process(target=DR)
     p2 = Process(target=reM)
     p1.start()
     p2.start()
+    print("sleep")
+    time.sleep(30)
+    th = m.get_threadTag()
+    th.set()
+    print("start:")
     p1.join()
+    p2.join()
+    time.sleep(30)
 

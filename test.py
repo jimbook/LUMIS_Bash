@@ -1,6 +1,6 @@
 from multiprocessing import Process, Value, Lock,Event
 from multiprocessing.managers import BaseManager
-from pysnooper import snoop
+
 import pandas as pd
 class Employee(object):
     data = []

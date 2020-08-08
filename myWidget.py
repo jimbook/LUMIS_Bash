@@ -4,6 +4,7 @@ import gc
 import copy
 import pandas as pd
 import numpy as np
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget,QApplication
 from UI.myPlot import Ui_Form
 from globelParameter import dataStorage,_chnList,_typeList
@@ -15,6 +16,7 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.retranslateUi(self)
         self.setMore()
         self.setEvent()
+        self.time_updata.start(3000)
 
     def setMore(self):
         self.data = pd.DataFrame()
@@ -26,11 +28,13 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.plotItem.addItem(self.plotDataItem)
         self.spinBox_baseLine.setValue(435)
         self.horizontalSlider_baseLine.setValue(435)
+        self.time_updata = QTimer()
 
     def setEvent(self):
         # change base line
         self.spinBox_baseLine.valueChanged.connect(self.changeBaseLine)
         self.horizontalSlider_baseLine.valueChanged.connect(self.changeBaseLine)
+        self.time_updata.timeout.connect(self.dataUpdate)
 
     # 设置数据和参数
     def setData(self,data: dataStorage,tier: int,channel: str,HighGain: bool):
@@ -96,40 +100,49 @@ class subPlotWin_singal(Ui_Form,QWidget):
 
     # 更新数据
     def dataUpdate(self):
-        if self.energy_data_memory is None:    # 如果是新开启的界面，要从内存和硬盘读取全部数据
-            # 读取内存中的数据
-            listOfData = self.data.get_memoryData()
-            frameOfData = pd.DataFrame(listOfData,index=[0],columns=[_chnList,_typeList])
-            self.index_memory = len(listOfData)
-            self.energy_data_memory,self.bars = self.selectData(frameOfData)
-            # 读取所有硬盘中的数据
-            files = self.data.get_diskData()
-            for i in files:
-                _data = pd.read_csv(i)
-                _x,y = self.selectData(_data)
-                if self.energy_data_disk is None:
-                    self.energy_data_disk = y
-                else:
-                    self.energy_data_disk = self.energy_data_disk + y
-            self.index_disk = len(files)
-        else:   # 如果不是新开的界面，只会读取新的数据，处理后与当前数据相加
-            listOfData = self.data.get_memoryData()
-            # 如果数据只在内存中更新
-            if len(listOfData) >= self.index_memory:
-                d = pd.DataFrame(listOfData[self.index_memory:],index=[0],columns=[_chnList,_typeList])
-                self.index_memory = len(d)
-                self.energy_data_memory = self.energy_data_memory + self.selectData(d)[1]
-            else: #如果内存中的数据已经达到128MB而清空过，读取硬盘中最新的那个数据文件，同时读取内存中的数据
-                # 读取硬盘中新文件的数据
-                files = self.data.get_diskData()
-                _dataFromFile = pd.DataFrame(files[self.index_disk])
-                self.energy_data_disk = self.energy_data_disk + self.selectData(_dataFromFile)[1]
+        print("dataUpdata")
+        try:
+            if self.energy_data_memory is None:    # 如果是新开启的界面，要从内存和硬盘读取全部数据
                 # 读取内存中的数据
+                listOfData = np.array(self.data.get_memoryData()).reshape((-1,219))
+                print("source",listOfData)
+                frameOfData = pd.DataFrame(listOfData,columns=[_chnList,_typeList])
                 self.index_memory = len(listOfData)
-                d = pd.DataFrame(listOfData,index=[0],columns=[_chnList,_typeList])
-                self.energy_data_memory = self.selectData(d)[1]
-        self.plotUpdate()
-        gc.collect()
+                self.energy_data_memory,self.bars = self.selectData(frameOfData)
+                # 读取所有硬盘中的数据
+                files = self.data.get_diskData()
+                for i in files[:-1]:
+                    print(i)
+                    _data = pd.read_csv(i,index_col=0,header=[0,1])
+                    y,_x = self.selectData(_data)
+                    if self.energy_data_disk is None:
+                        self.energy_data_disk = y
+                    else:
+                        self.energy_data_disk = self.energy_data_disk + y
+                self.index_disk = len(files)
+            else:   # 如果不是新开的界面，只会读取新的数据，处理后与当前数据相加
+                listOfData = np.array(self.data.get_memoryData()).reshape((-1,219))
+                # 如果数据只在内存中更新
+                print("index",self.index_memory,"add:",listOfData)
+                if len(listOfData) >= self.index_memory:
+                    d = pd.DataFrame(listOfData[self.index_memory:],columns=[_chnList,_typeList])
+                    self.index_memory = len(listOfData)
+                    self.energy_data_memory = self.energy_data_memory + self.selectData(d)[0]
+                else: #如果内存中的数据已经达到128MB而清空过，读取硬盘中最新的那个数据文件，同时读取内存中的数据
+                    # 读取硬盘中新文件的数据
+                    files = self.data.get_diskData()
+                    _dataFromFile = pd.DataFrame(files[self.index_disk])
+                    self.energy_data_disk = self.energy_data_disk + self.selectData(_dataFromFile)[0]
+                    # 读取内存中的数据
+                    self.index_memory = len(listOfData)
+                    d = pd.DataFrame(listOfData,index=[0],columns=[_chnList,_typeList])
+                    self.energy_data_memory = self.selectData(d)[0]
+            print("plotUpdata")
+            self.plotUpdate()
+        except:
+            import traceback
+            traceback.print_exc()
+
 
     # 更新图像
     def plotUpdate(self):
@@ -151,9 +164,9 @@ class subPlotWin_singal(Ui_Form,QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    data =pd.read_csv(".\\data\\mydata.txt",sep=',',header=[0,1],index_col=0)
+    data = pd.read_csv(".\\data\\2020_08_08\\190101_data\\tempData_0.txt", sep=',', header=[0, 1], index_col=0)
     d1 = data.values.tolist()
     ex = subPlotWin_singal()
-    ex._setData(d1,1,"chn_12",False)
+    ex._setData(d1, 1, "chn_12", False)
     ex.show()
     sys.exit(app.exec_())

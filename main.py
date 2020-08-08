@@ -3,6 +3,13 @@ from PyQt5.QtWidgets import QApplication
 from mainWindow import window
 from multiprocessing import Process
 from globelParameter import DataManager,_address,_authkey,dataReceiveServer
+#
+def process_GUI():
+    app = QApplication(sys.argv)
+    ex = window()
+    ex.show()
+    sys.exit(app.exec_())
+    print("end")
 
 def process_DataServer():
     DM = DataManager(address=_address,authkey=_authkey)
@@ -15,7 +22,7 @@ def process_DataServer():
     _threadTag.clear()
     _processTag.set()
     _dataTag.set()
-    print("开始计数")
+    print("开始计数,process:{}".format(_processTag.is_set()))
     dataReceiveServer(_shareData,_threadTag,_dataTag,_processTag,_messageQueue)
 
 if __name__ == "__main__":
@@ -30,7 +37,13 @@ if __name__ == "__main__":
         dataServer = Process(target=process_DataServer)
         # dataServer.daemon = True
         dataServer.start()
-    # 开启GUI进程
+        # 开启GUI进程
+    # GUI = Process(target=process_GUI)
+    # GUI.daemon = True
+    # # 开启GUI进程
+    # GUI.start()
+    # GUI.join()
+    # print("out")
     app = QApplication(sys.argv)
     try:
         ex = window(manager=manager)
@@ -38,4 +51,6 @@ if __name__ == "__main__":
     except:
         import traceback
         traceback.print_exc()
-    sys.exit(app.exec_())
+    app.exec_()
+    print("end")
+    #dataServer.terminate()
