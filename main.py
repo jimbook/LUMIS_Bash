@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication
 from mainWindow import window
 from multiprocessing import Process
 from globelParameter import DataManager,_address,_authkey,dataReceiveServer
-#
+# 已弃用，开GUI进程
 def process_GUI():
     app = QApplication(sys.argv)
     ex = window()
@@ -11,18 +11,22 @@ def process_GUI():
     sys.exit(app.exec_())
     print("end")
 
+# 开启数据接收进程
 def process_DataServer():
+    # 连接共享数据服务
     DM = DataManager(address=_address,authkey=_authkey)
     DM.connect()
+    # 从共享数据服务中获取共享对象
     _shareData = DM.get_shareData()
     _threadTag = DM.get_threadTag()
     _dataTag = DM.get_dataTag()
     _processTag = DM.get_processTag()
     _messageQueue = DM.get_messageQueue()
+    # 对标志变量进行初始化
     _threadTag.clear()
     _processTag.set()
     _dataTag.set()
-    print("开始计数,process:{}".format(_processTag.is_set()))
+    print("数据接收进程初始化成功{}".format(_processTag.is_set()))
     dataReceiveServer(_shareData,_threadTag,_dataTag,_processTag,_messageQueue)
 
 if __name__ == "__main__":
@@ -37,13 +41,7 @@ if __name__ == "__main__":
         dataServer = Process(target=process_DataServer)
         # dataServer.daemon = True
         dataServer.start()
-        # 开启GUI进程
-    # GUI = Process(target=process_GUI)
-    # GUI.daemon = True
-    # # 开启GUI进程
-    # GUI.start()
-    # GUI.join()
-    # print("out")
+    # 开启GUI进程
     app = QApplication(sys.argv)
     try:
         ex = window(manager=manager)
@@ -52,5 +50,3 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
     app.exec_()
-    print("end")
-    #dataServer.terminate()

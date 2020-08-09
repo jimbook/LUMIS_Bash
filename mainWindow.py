@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import os,sys,socket,time,gc,datetime
 import threading
+import copy
 from globelParameter import dataChannel
 from dataAnalyse import chnList
 from linkGBT import linkGBT
@@ -13,7 +14,7 @@ from PyQt5.QtWidgets import *
 from UI.mainWindow import Ui_MainWindow
 #
 class window(QMainWindow,Ui_MainWindow):
-    updateSingal = pyqtSignal()
+    updateSingal = pyqtSignal(list,list)
     messageSingal = pyqtSignal(str)
     def __init__(self,*args,manager = None):
         super(window, self).__init__(*args)
@@ -35,6 +36,9 @@ class window(QMainWindow,Ui_MainWindow):
         # 开启从数据服务进程接收数据的服务
         t = threading.Thread(target=self.getMessge)
         t.start()
+        # 数据项
+        self.dataInMemory = [] # 内存中的数据
+        self.dataInDisk = [] # 硬盘中数据的路径
 
     def setEvent(self):
         #communication event
@@ -43,8 +47,7 @@ class window(QMainWindow,Ui_MainWindow):
         #plot event
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum)
         #auxiliary event
-        self.timer.timeout.connect(self.timeOut_event) #
-        self.messageSingal.connect(self.addMessage)
+        self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -83,7 +86,7 @@ class window(QMainWindow,Ui_MainWindow):
             self.addMessage("只能发送2bytes的命令！")
 
     # event: start or stop data receive thread.Meanwhile,it will show the measuring time.
-    # 事件：开启/结束数据接收线程，同时会显示测量时间
+    # 事件：通过更改标志来开启/结束数据接收线程
     def switchReceiveDataThread_event(self,switch: bool):
         try:
             if switch:
@@ -96,44 +99,44 @@ class window(QMainWindow,Ui_MainWindow):
                 self.timer.stop()
                 self.pushButton_dataReceive.setText("开始接收数据")
                 self.pushButton_dataReceive.setDisabled(True)
-                self.addMessage("等待将缓存中的数据处理完成，释放socket连接。")
+                self.addMessage("等待数据服务进程停止接收数据")
         except:
             import traceback
             traceback.print_exc()
 
     #辅助函数：获取从数据服务中获取的消息，同时根据数据服务进程的状态使按钮可用
     def getMessge(self):
-        print(1)
         while True:
-            try:
-                msg = self.dataChn.mq.get()
-                self.messageSingal.emit(msg)
-            except:
-                import traceback
-                traceback.print_exc()
-            if self.dataChn.dataTag.is_set(): # 如果此时数据接收已经结束，让配置/开始接收数据按钮可用
+            # 从消息队列中获取消息
+            msg = self.dataChn.mq.get()
+            self.messageSingal.emit(msg)
+            # 如果此时数据接收已经结束，让配置/开始接收数据按钮可用
+            if self.dataChn.dataTag.is_set():
                 self.pushButton_sendCommand.setEnabled(True)
                 self.pushButton_config.setEnabled(True)
                 self.pushButton_dataReceive.setEnabled(True)
             else:       # 如果此时在接收数据，发送更新数据的指令
-                self.updateSingal.emit()
+                self.dataInMemory = copy.copy(self.dataChn.dataStorage.get_memoryData())
+                self.dataInDisk = copy.copy(self.dataChn.dataStorage.get_diskData())
+                self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
+                gc.collect()
 
     # 事件：添加单通道能谱
     def plotSingalEnergySpectum(self):
         subWin = QMdiSubWindow()
         subWin.setAttribute(Qt.WA_DeleteOnClose)
         singalEnergryPlot = subPlotWin_singal()
-        singalEnergryPlot.setData(self.dataChn.dataStorage,
+        singalEnergryPlot.setData(self.dataInMemory,self.dataInDisk,
                                   int(self.comboBox_singal_tier.currentText()),self.comboBox_singal_channel.currentText(),
                                   self.checkBox_singal.isChecked())
-        # self.updateSingal.connect(subPlotWin_singal.dataUpdate)
+        self.updateSingal.connect(subPlotWin_singal.dataUpdate)
         singalEnergryPlot.changeBaseLine(self.spinBox_baseLine.value())
         subWin.setWidget(singalEnergryPlot)
         self.mdiArea.addSubWindow(subWin)
         subWin.show()
 
     #auxiliary: erver interval will call this function to refresh clock widget
-    #辅助函数：每过一个时间间隔将会调用一次，来刷新时间显示控件显示的时间
+    #辅助函数：每过一个时间间隔将会调用一次，来刷新时间显示控件显示的时间(已弃用)
     def timeOut_event(self):
         self.time = self.time.addMSecs(self.timer.interval())
         self.lcdNumber_s_ms.display(self.time.toString("ss.zzz")[:-1])

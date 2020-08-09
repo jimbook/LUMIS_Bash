@@ -85,10 +85,11 @@ class unpack(object):
         self._tCount = 0  # triggerID重置的次数
         self._temTID = 0  # 当前包的triggerID
         # 辅助参数
-        self._readSize = 1024 * 100  # 每次读取数据的大小
+        self._readSize = 1024 * 256  # 每次读取数据的大小
         self._threadTag = tag  # 标志线程是否应该结束
         self._messageQueue = message_queue  # 用于向GUI发送消息
         self._sock = socket.socket()  # 连接
+        self._sock.settimeout(5)
         self._fileDir = None  # 数据存储路径
         # 数据相关
         self._dataStorage = data_storage  # 用于将数据放入数据服务
@@ -124,9 +125,16 @@ class unpack(object):
     # 接收数据,如果发生错误，会将线程标志置False
     def load(self):
         self._dataStorage.clear()
+        # 连接TCP连接，并发送开始数据传输命令，如果报错(无法连接)则直接返回False
         try:
             self._sock.connect((self._devIP, self._TCPport))
-            self._sock.send(b'\xff\x00')    # 发送命令，开始接收数据
+            self._sock.send(b'\xff\x00')  # 发送命令，开始接收数据
+        except Exception as e:
+            self._threadTag.clear()
+            self._messageQueue.put("an exception occurred while receiving data:\n" + e.__str__())
+            return False
+        # 成功连接后，创建数据存储文件夹，向info文件中添加开始接收数据的时间戳，然后开始接收数据，结束时向info添加结束时间戳
+        try:
             self._messageQueue.put("TCP connect successfuly")
             print("成功连接到设备")
             today = datetime.now().strftime("%Y_%m_%d")
@@ -139,15 +147,23 @@ class unpack(object):
             self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))  # 记录开始时间
             print("新建文件夹")
             self._loadsocket()
-            end_time = time.time()
-            self._addInfoToDisk("start time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-            self._addInfoToDisk("total time: {} sec".format(start_time - end_time))
-            self._messageQueue.put("the total time consuming:{}".format(start_time - end_time))
+            self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
+            self._sock.close()
+            self._messageQueue.put("stop command has sent,waiting for the cached data to be processed.")
+        except socket.timeout:
+            self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
+            self._sock.close()
+            self._messageQueue.put("stop command has sent,waiting for the cached data to be processed.")
         except Exception as e:
             import traceback
             traceback.print_exc()
             self._threadTag.clear()
             self._messageQueue.put("an exception occurred while receiving data:\n" + e.__str__())
+        finally:
+            end_time = time.time()
+            self._addInfoToDisk("stop time:{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            self._addInfoToDisk("total time: {} sec".format(start_time - end_time))
+            self._messageQueue.put("the total time consuming:{}".format(start_time - end_time))
 
     # auxiliary : search every SS2E packet and invoking the decode function from socket
     # 辅助函数：从socket连接中找到每一个符合规则的SSP2E数据包，然后调用_unpackage函数将这个包解析，将数据载入内存/写入硬盘
@@ -184,8 +200,8 @@ class unpack(object):
                                             "tempData_{}.txt".format(len(self._dataStorage.get_diskData())))
                     self._dataStorage.resetMeoryData(filePath)
                     file = open(filePath, "w")
-                    file.write(',' + ','.join(self._chnList) + '\n')
-                    file.write(',' + ','.join(self._typeList) + '\n')
+                    file.write(',' + ','.join(_chnList) + '\n')
+                    file.write(',' + ','.join(_typeList) + '\n')
                 # 将新读入的数据添加到缓存区，并把之前已读的数据清除，同时将包尾的索引清零
                 buff = buff[tails + 3:] + b
                 tails = 0
@@ -218,8 +234,6 @@ class unpack(object):
         #             self._unpackage(buff[header:tails + 4], file=file)
         #         else:
         #             self._ChipIDError += 1
-        self._sock.send(b'\xff\x01')  # 发送停止接收数据的指令
-        self._messageQueue.put("stop command has sent,waiting for the cached data to be processed.")
         file.close()
         gc.collect()
 
@@ -386,6 +400,8 @@ class dataChannel(object):
     def getMessage(self):
         msg = self.mq.get()
         return msg
+
+# 测试用函数，将消息队列中的消息打印出来
 def reM():
     drm = DataManager(address=_address,authkey=_authkey)
     drm.connect()
@@ -393,6 +409,7 @@ def reM():
     while True:
         print(mq.get())
 
+# 测试用函数，数据服务进程
 def DR():
     drm = DataManager(address=_address,authkey=_authkey)
     drm.connect()

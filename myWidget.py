@@ -1,5 +1,6 @@
 import pyqtgraph as pg
-import os,sys
+import os
+import sys
 import gc
 import copy
 import pandas as pd
@@ -16,7 +17,6 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.retranslateUi(self)
         self.setMore()
         self.setEvent()
-        self.time_updata.start(3000)
 
     def setMore(self):
         self.data = pd.DataFrame()
@@ -28,121 +28,68 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.plotItem.addItem(self.plotDataItem)
         self.spinBox_baseLine.setValue(435)
         self.horizontalSlider_baseLine.setValue(435)
-        self.time_updata = QTimer()
+
 
     def setEvent(self):
         # change base line
         self.spinBox_baseLine.valueChanged.connect(self.changeBaseLine)
         self.horizontalSlider_baseLine.valueChanged.connect(self.changeBaseLine)
-        self.time_updata.timeout.connect(self.dataUpdate)
 
-    # 设置数据和参数
-    def setData(self,data: dataStorage,tier: int,channel: str,HighGain: bool):
+
+    # 设置数据和参数，初始化界面时用
+    def setData(self,data_memory: list,data_disk: list,tier: int,channel: str,HighGain: bool):
         '''
-        :param data: 数据
-        :param tier: 层数
-        :param channel: 通道
-        :param HighGain: 是否是高增益
-        :return:
+            :param data: 数据
+            :param tier: 层数
+            :param channel: 通道
+            :param HighGain: 是否是高增益
+            :return:
         '''
         self.tier = tier
         self.channel = channel
         self.HighGain = "charge/HighGain" if HighGain else "time/LowGain"
-        self.index_disk = 0
         self.index_memory = 0
         self.energy_data_disk = None
         self.energy_data_memory = None
-        self.bars = None
-        #set title
-        self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier,channel,"高" if HighGain else "低"))
-        self.data = data
-        self.dataUpdate()
-
-    # 模块测试用
-    def _setData(self,data: dataStorage,tier: int,channel: str,HighGain: bool):
-        '''
-        :param data: 数据
-        :param tier: 层数
-        :param channel: 通道
-        :param HighGain: 是否是高增益
-        :return:
-        '''
-        self.tier = tier
-        self.channel = channel
-        self.HighGain = "charge/HighGain" if HighGain else "time/LowGain"
-        self.index_disk = 0
-        self.index_memory = 0
-        self.energy_data_disk = None
-        self.energy_data_memory = None
-        self.bars = None
-        #set title
-        self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier,channel,"高" if HighGain else "低"))
-        self.data = data
-        self._dataUpdate()
-
-    # 模块测试用
-    def _dataUpdate(self):
-        # 读取内存中的数据
-        listOfData = self.data
-        npOfData = np.array(listOfData)
-        frameOfData = pd.DataFrame(npOfData,columns=[_chnList, _typeList])
+        self.bars = None  # x轴分bin
+        # set title
+        self.setWindowTitle("第{0}层-第{1}通道-{2}增益能谱".format(tier, channel, "高" if HighGain else "低"))
+        #载入内存数据
+        listOfData = np.array(data_memory).reshape((-1, 219))
+        print("source", listOfData)
+        frameOfData = pd.DataFrame(listOfData, columns=[_chnList, _typeList])
+        self.index_memory = listOfData.shape[0]
         self.energy_data_memory, self.bars = self.selectData(frameOfData)
+        # 读取所有硬盘中的数据
+        for i in data_disk[:-1]:
+            print(i)
+            _data = pd.read_csv(i, index_col=0, header=[0, 1])
+            y, _x = self.selectData(_data)
+            if self.energy_data_disk is None:
+                self.energy_data_disk = y
+            else:
+                self.energy_data_disk = self.energy_data_disk + y
         self.plotUpdate()
-        gc.collect()
-
-    # 辅助函数：将目标采集板和通道上被触发的数据筛选出来,然后通过函数np.histogram转化为直方图坐标x,y
-    def selectData(self,d: pd.DataFrame):
-        _d = d[self.channel][self.HighGain]
-        index = (d["SCAinfo"]["BoardID"] == self.tier)&(d[self.channel][self.HighGain + "_hit"] == 1)
-        _d = _d.values[index]  # 将目标板子和通道已触发的数据筛选出
-        y, x = np.histogram(_d, bins=np.linspace(0, 2 ** 12, 2 ** 12))
-        return y,x
 
     # 更新数据
-    def dataUpdate(self):
-        print("dataUpdata")
-        try:
-            if self.energy_data_memory is None:    # 如果是新开启的界面，要从内存和硬盘读取全部数据
-                # 读取内存中的数据
-                listOfData = np.array(self.data.get_memoryData()).reshape((-1,219))
-                print("source",listOfData)
-                frameOfData = pd.DataFrame(listOfData,columns=[_chnList,_typeList])
-                self.index_memory = len(listOfData)
-                self.energy_data_memory,self.bars = self.selectData(frameOfData)
-                # 读取所有硬盘中的数据
-                files = self.data.get_diskData()
-                for i in files[:-1]:
-                    print(i)
-                    _data = pd.read_csv(i,index_col=0,header=[0,1])
-                    y,_x = self.selectData(_data)
-                    if self.energy_data_disk is None:
-                        self.energy_data_disk = y
-                    else:
-                        self.energy_data_disk = self.energy_data_disk + y
-                self.index_disk = len(files)
-            else:   # 如果不是新开的界面，只会读取新的数据，处理后与当前数据相加
-                listOfData = np.array(self.data.get_memoryData()).reshape((-1,219))
-                # 如果数据只在内存中更新
-                print("index",self.index_memory,"add:",listOfData)
-                if len(listOfData) >= self.index_memory:
-                    d = pd.DataFrame(listOfData[self.index_memory:],columns=[_chnList,_typeList])
-                    self.index_memory = len(listOfData)
-                    self.energy_data_memory = self.energy_data_memory + self.selectData(d)[0]
-                else: #如果内存中的数据已经达到128MB而清空过，读取硬盘中最新的那个数据文件，同时读取内存中的数据
-                    # 读取硬盘中新文件的数据
-                    files = self.data.get_diskData()
-                    _dataFromFile = pd.DataFrame(files[self.index_disk])
-                    self.energy_data_disk = self.energy_data_disk + self.selectData(_dataFromFile)[0]
-                    # 读取内存中的数据
-                    self.index_memory = len(listOfData)
-                    d = pd.DataFrame(listOfData,index=[0],columns=[_chnList,_typeList])
-                    self.energy_data_memory = self.selectData(d)[0]
-            print("plotUpdata")
-            self.plotUpdate()
-        except:
-            import traceback
-            traceback.print_exc()
-
+    def dataUpdate(self,data_memory: list,data_disk: list):
+        listOfData = np.array(data_memory).reshape((-1, 219))
+        # 如果数据只在内存中更新,只计算新增的数据
+        print("index", self.index_memory, "add:", listOfData)
+        if listOfData.shape[0] >= self.index_memory:
+            d = pd.DataFrame(listOfData[self.index_memory:], columns=[_chnList, _typeList])
+            self.index_memory = listOfData.shape[0]
+            self.energy_data_memory = self.energy_data_memory + self.selectData(d)[0]
+        else:  # 如果内存中的数据已经达到32MB而清空过，读取硬盘中最新的那个数据文件，同时读取内存中的数据
+            # 读取硬盘中新文件的数据
+            _dataFromFile = pd.read_csv(data_disk[-2],index_col=0,header=[0,1])
+            self.energy_data_disk = self.energy_data_disk + self.selectData(_dataFromFile)[0]
+            # 读取内存中的数据
+            self.index_memory = listOfData.shape[0]
+            d = pd.DataFrame(listOfData, index=[0], columns=[_chnList, _typeList])
+            self.energy_data_memory = self.selectData(d)[0]
+        print("plotUpdata")
+        self.plotUpdate()
 
     # 更新图像
     def plotUpdate(self):
@@ -161,6 +108,13 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.horizontalSlider_baseLine.setValue(new)
         self.plotUpdate()
 
+    # 辅助函数：将目标采集板和通道上被触发的数据筛选出来,然后通过函数np.histogram转化为直方图坐标x,y
+    def selectData(self,d: pd.DataFrame):
+        _d = d[self.channel][self.HighGain]
+        index = (d["SCAinfo"]["BoardID"] == self.tier)&(d[self.channel][self.HighGain + "_hit"] == 1)
+        _d = _d.values[index]  # 将目标板子和通道已触发的数据筛选出
+        y, x = np.histogram(_d, bins=np.linspace(0, 2 ** 12, 2 ** 12))
+        return y,x
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

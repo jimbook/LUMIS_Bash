@@ -262,7 +262,7 @@
               <item>
                <widget class="QSpinBox" name="spinBox_baseLine">
                 <property name="minimum">
-                 <number>435</number>
+                 <number>0</number>
                 </property>
                 <property name="maximum">
                  <number>4095</number>
