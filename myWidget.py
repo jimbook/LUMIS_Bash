@@ -5,7 +5,7 @@ import gc
 import copy
 import pandas as pd
 import numpy as np
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer,pyqtSlot
 from PyQt5.QtWidgets import QWidget,QApplication
 from UI.myPlot import Ui_Form
 from globelParameter import dataStorage,_chnList,_typeList
@@ -72,6 +72,7 @@ class subPlotWin_singal(Ui_Form,QWidget):
         self.plotUpdate()
 
     # 更新数据
+    @pyqtSlot(list,list)
     def dataUpdate(self,data_memory: list,data_disk: list):
         listOfData = np.array(data_memory).reshape((-1, 219))
         # 如果数据只在内存中更新,只计算新增的数据

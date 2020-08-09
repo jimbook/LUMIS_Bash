@@ -48,6 +48,9 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum)
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
+        # synchronizeData
+        self.timer.timeout.connect(self.synchronizeData)
+
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -94,12 +97,14 @@ class window(QMainWindow,Ui_MainWindow):
                 self.pushButton_dataReceive.setText("停止接收数据")
                 self.pushButton_config.setDisabled(True)    # 采集时禁止其他通讯方式使用TCP连接，
                 self.pushButton_sendCommand.setDisabled(True)
+                self.timer.start(5000)
             else:
                 self.dataChn.threadTag.clear()
                 self.timer.stop()
                 self.pushButton_dataReceive.setText("开始接收数据")
                 self.pushButton_dataReceive.setDisabled(True)
                 self.addMessage("等待数据服务进程停止接收数据")
+                self.timer.stop()
         except:
             import traceback
             traceback.print_exc()
@@ -115,11 +120,16 @@ class window(QMainWindow,Ui_MainWindow):
                 self.pushButton_sendCommand.setEnabled(True)
                 self.pushButton_config.setEnabled(True)
                 self.pushButton_dataReceive.setEnabled(True)
-            else:       # 如果此时在接收数据，发送更新数据的指令
-                self.dataInMemory = copy.copy(self.dataChn.dataStorage.get_memoryData())
-                self.dataInDisk = copy.copy(self.dataChn.dataStorage.get_diskData())
-                self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
-                gc.collect()
+            # else:       # 如果此时在接收数据，发送更新数据的指令
+            #     self.dataInMemory = copy.copy(self.dataChn.dataStorage.get_memoryData())
+            #     self.dataInDisk = copy.copy(self.dataChn.dataStorage.get_diskData())
+            #     self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
+            #     gc.collect()
+
+    def synchronizeData(self):
+        self.dataInMemory = copy.copy(self.dataChn.dataStorage.get_memoryData())
+        self.dataInDisk = copy.copy(self.dataChn.dataStorage.get_diskData())
+        self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
 
     # 事件：添加单通道能谱
     def plotSingalEnergySpectum(self):
@@ -129,7 +139,7 @@ class window(QMainWindow,Ui_MainWindow):
         singalEnergryPlot.setData(self.dataInMemory,self.dataInDisk,
                                   int(self.comboBox_singal_tier.currentText()),self.comboBox_singal_channel.currentText(),
                                   self.checkBox_singal.isChecked())
-        self.updateSingal.connect(subPlotWin_singal.dataUpdate)
+        self.updateSingal.connect(singalEnergryPlot.dataUpdate)
         singalEnergryPlot.changeBaseLine(self.spinBox_baseLine.value())
         subWin.setWidget(singalEnergryPlot)
         self.mdiArea.addSubWindow(subWin)
