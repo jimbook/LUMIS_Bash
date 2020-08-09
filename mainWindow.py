@@ -33,9 +33,12 @@ class window(QMainWindow,Ui_MainWindow):
         # 单通道能谱
         self.comboBox_singal_tier.addItems(["1","2"])
         self.comboBox_singal_channel.addItems(chnList)
-        # 开启从数据服务进程接收数据的服务
+        # 开启从数据服务进程接收消息的服务
         t = threading.Thread(target=self.getMessge)
         t.start()
+        # 开启从数据服务进程接收数据的服务
+        t_data = threading.Thread(target=self.synchronizeData)
+        t_data.start()
         # 数据项
         self.dataInMemory = [] # 内存中的数据
         self.dataInDisk = [] # 硬盘中数据的路径
@@ -49,7 +52,7 @@ class window(QMainWindow,Ui_MainWindow):
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
         # synchronizeData
-        self.timer.timeout.connect(self.synchronizeData)
+        #self.timer.timeout.connect(self.synchronizeData)
 
 
     # init: load config file index
@@ -127,9 +130,13 @@ class window(QMainWindow,Ui_MainWindow):
             #     gc.collect()
 
     def synchronizeData(self):
-        self.dataInMemory = copy.copy(self.dataChn.dataStorage.get_memoryData())
-        self.dataInDisk = copy.copy(self.dataChn.dataStorage.get_diskData())
-        self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
+        self.dataChn.dataTag.wait()
+        while True:
+            self.dataInMemory = self.dataChn.dataStorage.get_memoryData()
+            self.dataInDisk = self.dataChn.dataStorage.get_diskData()
+            self.updateSingal.emit(self.dataInMemory,self.dataInDisk)
+            print("数据同步成功")
+            time.sleep(15)
 
     # 事件：添加单通道能谱
     def plotSingalEnergySpectum(self):

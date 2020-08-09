@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QApplication
 from mainWindow import window
 from multiprocessing import Process
 from globelParameter import DataManager,_address,_authkey,dataReceiveServer
+import profile
+import cProfile
 # 已弃用，开GUI进程
 def process_GUI():
     app = QApplication(sys.argv)
@@ -30,6 +32,12 @@ def process_DataServer():
     dataReceiveServer(_shareData,_threadTag,_dataTag,_processTag,_messageQueue)
 
 if __name__ == "__main__":
+    import cProfile, pstats, io
+    from pstats import SortKey
+    pr = cProfile.Profile()
+    pr.enable()
+    # ... do something ...
+
     try:
         manager = DataManager(address=_address, authkey=_authkey)
         manager.connect()
@@ -50,3 +58,9 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
     app.exec_()
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())

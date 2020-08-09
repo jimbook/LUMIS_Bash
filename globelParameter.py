@@ -8,6 +8,7 @@
 import gc
 import os
 import time
+import threading
 import socket
 import numpy as np
 import pandas as pd
@@ -85,7 +86,7 @@ class unpack(object):
         self._tCount = 0  # triggerID重置的次数
         self._temTID = 0  # 当前包的triggerID
         # 辅助参数
-        self._readSize = 1024 * 256  # 每次读取数据的大小
+        self._readSize = 1024 * 1024  # 每次读取数据的大小
         self._threadTag = tag  # 标志线程是否应该结束
         self._messageQueue = message_queue  # 用于向GUI发送消息
         self._sock = socket.socket()  # 连接
@@ -136,6 +137,8 @@ class unpack(object):
         # 成功连接后，创建数据存储文件夹，向info文件中添加开始接收数据的时间戳，然后开始接收数据，结束时向info添加结束时间戳
         try:
             self._messageQueue.put("TCP connect successfuly")
+            t = threading.Thread(target=self.sendMessage)
+            t.start()
             print("成功连接到设备")
             today = datetime.now().strftime("%Y_%m_%d")
             nowTime = datetime.now().strftime("%H%M%S")
@@ -165,6 +168,16 @@ class unpack(object):
             self._addInfoToDisk("total time: {} sec".format(start_time - end_time))
             self._messageQueue.put("the total time consuming:{}".format(start_time - end_time))
 
+    # 发送消息线程
+    def sendMessage(self):
+        while self._threadTag.is_set():
+            self._messageQueue.put(
+                "===={}====\nevent count:{}\n{}".format(
+                    datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))
+            print("===={}====\nevent count:{}\n{}".format(
+                datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))
+            time.sleep(5)
+
     # auxiliary : search every SS2E packet and invoking the decode function from socket
     # 辅助函数：从socket连接中找到每一个符合规则的SSP2E数据包，然后调用_unpackage函数将这个包解析，将数据载入内存/写入硬盘
     def _loadsocket(self):
@@ -180,16 +193,11 @@ class unpack(object):
         tails = 0
         print(self._threadTag.is_set())
         while buff != 0 and self._threadTag.is_set():
-            print("===={}====\nevent count:{}\n{}".format(
-                        datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))
             try:
                 header = buff.index(b'\xfa\x5a', tails)
                 tails = buff.index(b'\xfe\xee', header)
             except ValueError:  # 如果找不到一个完整的包，则继续读入一部分数据
                 b = self._sock.recv(self._readSize)
-                self._messageQueue.put(
-                    "===={}====\nevent count:{}\n{}".format(
-                        datetime.now().strftime("%H:%M:%S"), self.eventCount(), self.badPackage()))
                 # 如果没有数据可读，则退出循环
                 if len(b) == 0:
                     break

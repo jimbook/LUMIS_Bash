@@ -1,6 +1,5 @@
 from multiprocessing import Process, Value, Lock,Event
 from multiprocessing.managers import BaseManager
-
 import pandas as pd
 class Employee(object):
     data = []
@@ -53,4 +52,5 @@ def main():
         p.join()
 
 if __name__ == '__main__':
-    main()
+    import pyqtgraph.examples
+    pyqtgraph.examples.run()
