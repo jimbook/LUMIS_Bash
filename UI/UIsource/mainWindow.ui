@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1017</width>
+    <width>1002</width>
     <height>754</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1017</width>
+     <width>1002</width>
      <height>26</height>
     </rect>
    </property>
@@ -55,15 +55,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_linkBehave">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>272</width>
-          <height>207</height>
+          <width>314</width>
+          <height>336</height>
          </rect>
         </property>
         <attribute name="label">
@@ -189,6 +189,39 @@
           </layout>
          </item>
          <item>
+          <widget class="QGroupBox" name="groupBox_5">
+           <property name="title">
+            <string>定时器</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <widget class="QSpinBox" name="spinBox_timer_hour">
+              <property name="suffix">
+               <string>小时</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBox_timer_minute">
+              <property name="suffix">
+               <string>分钟</string>
+              </property>
+              <property name="maximum">
+               <number>59</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_timer">
+              <property name="text">
+               <string>开启定时器</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -208,14 +241,14 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>276</height>
+          <width>279</width>
+          <height>377</height>
          </rect>
         </property>
         <attribute name="label">
          <string>图像显示</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_9">
+        <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
           <widget class="QGroupBox" name="groupBox_3">
            <property name="title">
@@ -267,6 +300,9 @@
                 <property name="maximum">
                  <number>4095</number>
                 </property>
+                <property name="value">
+                 <number>415</number>
+                </property>
                </widget>
               </item>
              </layout>
@@ -282,6 +318,96 @@
               </item>
               <item>
                <widget class="QPushButton" name="pushButton_singal_addPlot">
+                <property name="text">
+                 <string>添加图像</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string>符合能谱</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>所在层：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_coincidence_tier"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>显示通道：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_coincidence_showChannel"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>符合通道：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_coincidence_coinChannel"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>基线设置：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="spinBox_coincidence_baseline">
+                <property name="maximum">
+                 <number>4025</number>
+                </property>
+                <property name="value">
+                 <number>415</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <widget class="QCheckBox" name="checkBox_coincidence_highGain">
+                <property name="text">
+                 <string>高增益</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_coincidence_addPlot">
                 <property name="text">
                  <string>添加图像</string>
                 </property>

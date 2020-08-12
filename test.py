@@ -52,5 +52,11 @@ def main():
         p.join()
 
 if __name__ == '__main__':
-    import pyqtgraph.examples
-    pyqtgraph.examples.run()
+    import os
+    for root,dirs,files in os.walk("C:\\Users\\jimbook\\Desktop\\configuration"):
+        for f in files:
+            with open(os.path.join(root,f),'rb') as bf:
+                binary = bf.read()
+            with open(os.path.join(root,f.split(".")[0]+"_4boards.dat"),"wb") as wf:
+                wf.write(b'\xff\xe4')
+                wf.write(binary[2:])

@@ -44,14 +44,16 @@ class dataStorage(object):
         self.dataLock = Lock()
         self.memoryData = []
         self.diskData = []
+        self.index = 0
 
     def addMeoryData(self,inpute: list):
         with self.dataLock:
-            self.memoryData.append(inpute)
+            self.memoryData.extend(inpute)
 
     def resetMeoryData(self,filePath: str):
         with self.dataLock:
             self.memoryData.clear()
+            self.index = 0
             self.diskData.append(filePath)
 
     def clear(self):
@@ -70,6 +72,18 @@ class dataStorage(object):
     def get_both(self):
         with self.dataLock:
             return self.memoryData,self.diskData
+
+    def get_newData(self):
+        with self.dataLock:
+            length = len(self.memoryData)
+            _i = self.index
+            print("share memory:new{}--old{}".format(length,_i))
+            if length >= self.index:
+                self.index = length
+                return self.memoryData[_i:],True
+            else:
+                self.index = length
+                return self.memoryData,False
 
 # 为数据接收服务进程所编写的解析二进制数据类
 class unpack(object):
@@ -271,6 +285,8 @@ class unpack(object):
             raise ValueError("Packet header does not match.")
         elif not source[152:154] == b'\xfe\xee':
             raise ValueError("Packet tails do not match.")
+        # with open(".\\data\\binary",'ab') as f:
+        #     f.write(source)
         charge = [[], [], []]  # 暂时存储解析后数据的位置
         # Charge/HighGain information and time/LowGain information
         for j in range(36):
