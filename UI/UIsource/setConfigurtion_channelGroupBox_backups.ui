@@ -1,0 +1,796 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>697</width>
+    <height>299</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>阈值：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinBox_globalThreshole">
+       <property name="maximum">
+        <number>1023</number>
+       </property>
+       <property name="value">
+        <number>280</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>全局偏压：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_globalBias">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox_globalBias">
+       <property name="text">
+        <string>全部设为此</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_14">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>各通道偏压</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>通道2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>通道3</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>通道4</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>通道5</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QLabel" name="label_12">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
+      <widget class="QLabel" name="label_13">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="5">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="6">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="7">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="label_21">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLabel" name="label_19">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QLabel" name="label_20">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="6">
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="7">
+      <widget class="QLabel" name="label_22">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_13">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_17">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_16">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_18">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="4">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_14">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="5">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_15">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="6">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="7">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_11">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_27">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="label_30">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QLabel" name="label_25">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="3">
+      <widget class="QLabel" name="label_24">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="4">
+      <widget class="QLabel" name="label_23">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="5">
+      <widget class="QLabel" name="label_26">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="6">
+      <widget class="QLabel" name="label_29">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="7">
+      <widget class="QLabel" name="label_28">
+       <property name="text">
+        <string>通道1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_24">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_20">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_22">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="3">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_19">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="4">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_25">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="5">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_21">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="6">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_23">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="7">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_26">
+       <property name="suffix">
+        <string>V</string>
+       </property>
+       <property name="minimum">
+        <double>25.289999999999999</double>
+       </property>
+       <property name="maximum">
+        <double>29.289999999999999</double>
+       </property>
+       <property name="value">
+        <double>28.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_31">
+       <property name="text">
+        <string>备用通道偏压</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_33">
+         <property name="text">
+          <string>通道1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_32">
+         <property name="text">
+          <string>通道1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_35">
+         <property name="text">
+          <string>通道1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="label_34">
+         <property name="text">
+          <string>通道1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_28">
+         <property name="suffix">
+          <string>V</string>
+         </property>
+         <property name="minimum">
+          <double>25.289999999999999</double>
+         </property>
+         <property name="maximum">
+          <double>29.289999999999999</double>
+         </property>
+         <property name="value">
+          <double>28.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_29">
+         <property name="suffix">
+          <string>V</string>
+         </property>
+         <property name="minimum">
+          <double>25.289999999999999</double>
+         </property>
+         <property name="maximum">
+          <double>29.289999999999999</double>
+         </property>
+         <property name="value">
+          <double>28.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_30">
+         <property name="suffix">
+          <string>V</string>
+         </property>
+         <property name="minimum">
+          <double>25.289999999999999</double>
+         </property>
+         <property name="maximum">
+          <double>29.289999999999999</double>
+         </property>
+         <property name="value">
+          <double>28.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_27">
+         <property name="suffix">
+          <string>V</string>
+         </property>
+         <property name="minimum">
+          <double>25.289999999999999</double>
+         </property>
+         <property name="maximum">
+          <double>29.289999999999999</double>
+         </property>
+         <property name="value">
+          <double>28.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

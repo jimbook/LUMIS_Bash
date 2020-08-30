@@ -1,0 +1,13 @@
+
+Test SPIROC2E - BGA Chip # FRA 703-1596
+The 31/05/2019 at 17:55
+
+Slow_Control_Register		OK
+SCA_Read_Register		OK
+Probe_Register		OK
+
+I_3V3A	I_3V3D	I_5V	V_BG	V_TH	V_GS
+0,0885309	0,0037358	0,0000298	2,4819231	1,3669049	1,6972255
+
+HG Analog Readout w. AutoTrigger delayed by FPGA
+Ch.	Pedestal	3pe	10pe	25pe
