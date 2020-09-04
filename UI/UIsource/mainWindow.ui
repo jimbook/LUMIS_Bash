@@ -70,7 +70,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_linkBehave">
         <property name="geometry">
@@ -78,13 +78,20 @@
           <x>0</x>
           <y>0</y>
           <width>314</width>
-          <height>274</height>
+          <height>333</height>
          </rect>
         </property>
         <attribute name="label">
          <string>连接操作</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QPushButton" name="pushButton_reset">
+           <property name="text">
+            <string>复位</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QGroupBox" name="groupBox">
            <property name="title">
@@ -519,8 +526,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>300</width>
+          <height>333</height>
          </rect>
         </property>
         <attribute name="label">

@@ -5,7 +5,7 @@ from dataLayer.shareMemory import dataChannel
 from pyqtgraph.dockarea import *
 from dataLayer.connectionTools import linkGBT
 from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence
-from GuiLayer.myWidget import setConfigurationDailog
+from GuiLayer.myWidget import setConfigurationDailog_basic
 from dataLayer.dataStorage import addDataInMemory
 from dataLayer.constantParameter import _Index
 from PyQt5.QtCore import *
@@ -51,6 +51,7 @@ class window(QMainWindow,Ui_MainWindow):
 
     def setEvent(self):
         #communication event
+        self.pushButton_reset.clicked.connect(self.sendResetOrder_event)
         self.pushButton_config.clicked.connect(self.sendConfigFile_event)
         self.pushButton_dataReceive.clicked.connect(self.switchReceiveDataThread_event)
         self.pushButton_sendCommand.clicked.connect(self.sendShortCommand_evet)
@@ -63,7 +64,6 @@ class window(QMainWindow,Ui_MainWindow):
         self.timer.timeout.connect(self.timeOut_event)
         # menu action event
         self.action_configuration.triggered.connect(self.action_configuration_event)
-
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -126,8 +126,22 @@ class window(QMainWindow,Ui_MainWindow):
             import traceback
             traceback.print_exc()
 
-    # event Function:send configuration file to device
-    # 事件：发送配置文件
+    # 事件：连接操作-发送复位命令
+    @pyqtSlot()
+    def sendResetOrder_event(self):
+        try:
+            reply,message = linkGBT.sendCommand(b'\xff\x02')
+            if reply:
+                self.addMessage('已发送复位指令')
+            else:
+                self.addMessage('发送复位命令失败')
+                self.addMessage(message)
+        except Exception as e:
+            self.addMessage('错误：')
+            self.addMessage(e.__str__())
+
+    # event Function:connect-send configuration file to device
+    # 事件：连接操作-发送配置文件
     @pyqtSlot()
     def sendConfigFile_event(self):
         filePath = os.path.join("./configurationFile", self.comboBox_configFile.currentText())
@@ -143,7 +157,7 @@ class window(QMainWindow,Ui_MainWindow):
             self.addMessage("错误：")
             self.addMessage(e.__str__())
 
-    # 事件：发送字符串指令
+    # 事件：连接操作-发送字符串指令
     @pyqtSlot()
     def sendShortCommand_evet(self):
         text = self.lineEdit_sendCommand.text()
@@ -157,8 +171,8 @@ class window(QMainWindow,Ui_MainWindow):
         else:
             self.addMessage("只能发送2bytes的命令！")
 
-    # event: start or stop data receive thread.Meanwhile,it will show the measuring time.
-    # 事件：通过更改标志来开启/结束数据接收线程
+    # event: connect-start or stop data receive thread.Meanwhile,it will show the measuring time.
+    # 事件：连接操作-通过更改标志来开启/结束数据接收线程
     @pyqtSlot(bool)
     def switchReceiveDataThread_event(self,switch: bool):
         try:
@@ -222,7 +236,7 @@ class window(QMainWindow,Ui_MainWindow):
     # 事件：设置配置参数
     @pyqtSlot()
     def action_configuration_event(self):
-        setConfigurationDailog().dialogShow()
+        setConfigurationDailog_basic().dialogShow()
         self.init_loadConfigIndex()
 
     #auxiliary: erver interval will call this function to refresh clock widget

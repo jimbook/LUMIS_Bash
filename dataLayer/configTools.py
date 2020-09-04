@@ -174,18 +174,14 @@ class configuration(object):
             self.boardList[boardID].setProperty('DELAY_TRIGGER', newValue)
 
     # 配置偏压
-    def setBiasVoltage(self, newValue: int or float, boardID: int = None, channelID: int = None, UnitsVoltage: bool = False):
-        if UnitsVoltage and isinstance(newValue, float):
-            newValue = int(255 - (29.79 - newValue - 0.5) * 63.75) * 2 + 1
-            if newValue < 1 or newValue > 511:
-                raise ValueError('The range of newValue must be within 25.29V~29.29V')
-        elif (not UnitsVoltage) and isinstance(newValue, int):
+    def setBiasVoltage(self, newValue: int, boardID: int = None, channelID: int = None):
+        if isinstance(newValue, int):
             if newValue < 0 or newValue > 255:
-                raise ValueError('The range of newValue must be within 1~511')
+                raise ValueError('The range of newValue must be within 0~255')
             else:
                 newValue = int(newValue * 2 + 1)
         else:
-            raise ValueError("when set UnitsVoltage as {},type of newValue should be {}".format(UnitsVoltage,'float' if UnitsVoltage else 'int'))
+            raise ValueError("Type of newValue should be int")
         # 如果未选择指定板，则配置所有板，会忽略指定的通道
         if boardID is None:
             for i in self.boardList:
@@ -227,13 +223,70 @@ class configuration(object):
         print(len(_b),_b.hex())
         return b'\xff' + _b
 
+import pandas as pd
+import numpy as np
+from io import StringIO
+from scipy.optimize import curve_fit
+# 获取某一块芯片36通道的转换参数
+def getArgs_VoltageToDigital(chipID: int or str) -> list:
+    '''
+
+    :param chipID: 芯片的序列ID
+    :return: list结构：list[tuple(arg_a,arg_b)],shape=(36,2)，列表中的每一个元组元素都是一个通道的参数
+    '''
+    #  用于拟合的函数
+    def voltageFunc(x, a, b):
+        return a * x + b
+    # 从文件读取数据
+    with open('dependence/chipAbout/CalibrationData/Test_SP2E_BGA_FRA 703-{}.data'.format(chipID)) as file:
+        _lines = file.readlines()
+    _i = [' ']
+    _i.extend(np.arange(36).astype(np.str).tolist())
+    indexLine = '\t'.join(_i)
+    indexLine += '\n'
+    dataLines = [indexLine]
+    dataLines.extend(_lines[53:63])
+    source = ''.join(dataLines).replace(',', '.')
+    with StringIO(source) as f:
+        dataFrame = pd.read_csv(f, header=0, sep='\t', index_col=0)
+    print(dataFrame)
+    # 计算拟合参数
+    y = dataFrame.index.values
+    result = []
+    for i in range(36):
+        x = dataFrame.iloc[:, i].values
+        popt, pcov = curve_fit(voltageFunc, x, y)
+        result.append(popt)
+        print(popt)
+    return result
+
+# 获取各层板子的芯片序列号(在此称为ChipID)
+def getChipID() ->dict:
+    with open('dependence/chipAbout/chipID.txt') as file:
+        buff = file.readlines()
+    chipDic = {}
+    for line in buff:
+        line.strip()
+        _temp = line.split()
+        if len(_temp) == 2:
+            chipDic[int(_temp[0])] = _temp[1]
+    return chipDic
+
+# 根据拟合结果参数的电压命令转换函数
+def Func_VoltageToDigital(x,a,b):
+    return a*(29.79 - x - 0.5) + b
+
 
 if __name__ == '__main__':
-    c = configuration()
-    c.setBoardsQuantity(8)
-    c.setThreshold(280)
-    c.setBiasVoltage(141)
-    b = c.getOrderBytes()
-    print(b.hex('-'))
-    with open('../configurationFile/conf.lmbc', 'wb') as f:
-        f.write(b)
+    l = getChipID()
+    for i in l.values():
+        print(i)
+
+    # c = configuration()
+    # c.setBoardsQuantity(8)
+    # c.setThreshold(280)
+    # c.setBiasVoltage(141)
+    # b = c.getOrderBytes()
+    # print(b.hex('-'))
+    # with open('../configurationFile/conf.lmbc', 'wb') as f:
+    #     f.write(b)
