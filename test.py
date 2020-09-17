@@ -1,78 +1,188 @@
-import re
-import os
-# for root,dirs,files in os.walk('C:\\Users\\jimbook\\Desktop\\缪子\\test_SP2E_USTC'):
-#     for file in files:
-#         r = re.match(r'^Test_SP2E_BGA_FRA 703-\d+.data$',file)
-#         if r is not None:
-#             with open(os.path.join(root,file),'r') as f:
-#                 readBuff = f.read()
-#             with open(os.path.join('dependence/chipAbout/CalibrationData', file), 'w') as f:
-#                 f.write(readBuff)
-#             print(file)
-# def
-# with open('dependence/chipAbout/chipID_ex.txt') as file:
-#     buff = file.readlines(63)
-#     print(buff)
-#     s = buff[0]
-#     s = s.strip()
-#     print(s)
-#     s = s.split()
-#     print(s)
-# import pandas as pd
-# import numpy as np
-# from io import StringIO
-# from scipy.optimize import curve_fit
-# def voltageFunc(x,a,b):
-#     return a * x + b
-# with open('dependence/chipAbout/CalibrationData/Test_SP2E_BGA_FRA 703-1290.data') as file:
-#     _lines = file.readlines()
-#     t = _lines[52]
-#     print(t)
-#     _i = [' ']
-#     _i.extend(np.arange(36).astype(np.str).tolist())
-#     indexLine = '\t'.join(_i)
-#     indexLine += '\n'
-#     dataLines = [indexLine]
-#     dataLines.extend(_lines[53:63])
-#     source = ''.join(dataLines).replace(',','.')
-#     print(source)
-#     with StringIO(source) as f:
-#         dataFrame = pd.read_csv(f, header=0,sep='\t',index_col=0)
-#     print(dataFrame)
-#     y = dataFrame.index.values
-#     x = dataFrame.iloc[:,0].values
-#     popt, pcov = curve_fit(voltageFunc,x,y)
-#     print(popt)
-#     import matplotlib.pyplot as mpl
-# mpl.plot(x,y,'bo',label='source')
-# mpl.plot(x,voltageFunc(x,*popt),'r--',label='fit')
-# mpl.legend()
-# mpl.grid()
-# mpl.show()
+import time
 import asyncio
-async def getData():
-    with open(r'C:\Users\jimbook\Desktop\LUMIS_Bash-GUI_ON_NET-separation\data\mydata.txt') as file:
-        buff = file.read()
-        return buff[:5]
+from socket import socketpair, socket
+from threading import Thread,Event ,Barrier
+from dataLayer.shareMemory import dataChannel
+from dataLayer.connectionTools import Lumis_Decode
+from dataLayer.cordForTest import dataChannel_test, dataReceiveThread_test
 
 
-async def factorial(name, number):
-    f = 1
-    for i in range(2, number + 1):
-        print(f"Task {name}: Compute factorial({i})...")
-        m = await asyncio.sleep(1)
-        print(m)
-        f *= i
-    print(f"Task {name}: factorial({number}) = {f}")
+#==============线程函数:辅助测试函数==================
+def sendThread(_s: socket, path: str,_b: Barrier, sleep: float = 0.1):
+    '''
+    --线程--
+    模拟socket发送数据线程，从测试数据文件中获取二进制数据
+    :param _s: 发送端的socket
+    :param _b: 结束等待栅栏对象
+    :param sleep: 发送间隔
+    :return:
+    '''
+    with open(path, 'rb') as binaryFile:
+        print('sendThread:', 'start')
+        while True:
+            buff = binaryFile.read(1024)
+            if buff == b'':
+                print('sendThread:', 'send all')
+                break
+            try:
+                _s.send(buff)
+                time.sleep(sleep)
+            except Exception as e:
+                print('sendThread:', e.__str__())
+                break
+    _b.wait()
+    print('sendThread:', "end")
+    _s.close()
 
-async def main():
-    # Schedule three calls *concurrently*:
-    await asyncio.gather(
-        factorial("A", 2),
-        factorial("B", 3),
-        factorial("C", 4),
-    )
+def receiveThread(_s: socket, _b: Barrier, tool: Lumis_Decode):
+    '''
+    --线程--
+    测试接收数据线程
+    :param _s: 接收数据的socket
+    :param _b: 结束等待栅栏对象
+    :param tool: 解析二进制数据工具
+    :return:
+    '''
+    _s.settimeout(1)
+    buff = _s.recv(1024)
+    print('receiveThread:', 'start')
+    while True:
+        rbuff = tool.loadBinaryData(buff)
+        try:
+            buff = rbuff + _s.recv(1024)
+        except Exception as e:
+            print('receiveThread:', e.__str__())
+            tool.putStopOrder()
+            break
+    _b.wait()
+    _s.close()
+    print('receiveThread:', 'end')
 
-asyncio.run(main())
+def decodeThread(_b: Barrier, tool: Lumis_Decode):
+    '''
+    --线程--
+    测试解码类解码(解码数据不保存)数据线程
+    :param _b: 结束等待栅栏对象
+    :param tool: 解码数据类
+    :return:
+    '''
+    print('decodeThread:', 'start')
+    while True:
+        try:
+            T, event = tool.decodingOneEventData()
+        except asyncio.CancelledError:
+            break
+        badPack = tool.badPackage()
+        count = tool.eventCount()
+        info = "-----BAD PACKAGE-----\n" \
+               "empty package:{}\n" \
+               "interrupt count:{}\n" \
+               "unknown package:{}\n" \
+               "total bad package:{}\n" \
+               "-----EVENT COUNT-----\n" \
+               "received package:{}\n" \
+               "valid event:{}\n" \
+               "---------------------".format(
+            *badPack,
+            badPack[0] + badPack[1] + badPack[2],
+            *count
+        )
+        print(info)
+    _b.wait()
+    print('decodeThread:', 'end')
+
+def orderSimulate(dc: dataChannel, _b: Barrier):
+    '''
+    --线程--
+    模拟GUI向数据接收进程发送指令,然后打印消息队列中的消息
+    :param dc: 获取共享数据类
+    :param _b: 结束等待栅栏对象
+    :return:
+    '''
+    order = int(input("orderSimulate:"))
+    if order == 0 or order == -1 or order == 1:
+        print("input:", order)
+        dc.orderPipe(True).send(order)
+    message = None #
+    n = 0
+    while True:
+        time.sleep(0.2)
+        result, _message = dc.messageQueue().get()
+        print(_message)
+        if message == _message:#or n == 60
+            print("orderSimulate:", 'send end order')
+            dc.orderPipe(True).send(-1)
+        else:
+            message = _message
+            n += 1
+        if result == -1:
+            print("orderSimulate:", 'receive end return')
+            break
+    _b.wait()
+    print("orderSimulate:", "end")
+
+def connectThread(dc: dataChannel, s: socket):
+    '''
+    --线程--
+    模拟接收数据进程
+    :param dc: 数据解码类
+    :param s: 接收数据的socket
+    :return:
+    '''
+    asyncio.run(dataReceiveThread_test(_dataChannel=dc, s=s))
+    dc.messageQueue().put((-1, 'the connection process has exited.'))
+    print('connectThread:','end')
+
+#===================测试函数==================
+def LumisDecode_Test():
+    '''
+    测试dataLayer.connectionTools中Lumis_Decode对象的功能
+    ===========测试逻辑========
+    测试模块分为三个线程：
+    1.模拟socket发送数据线程
+        载入二进制文件中的二进制数据，通过建立了连接的两个socket中的一个向另一个发送数据，以模拟设备通过网络协议向软件发送数据
+    2.载入数据线程：
+        模拟载入数据协程的功能，将二进制数据按每个板子分开存储到队列中区
+    3.解析数据线程：
+        模拟解析数据线程
+    :return:
+    '''
+    socket1, socket2 = socketpair()
+    tool = Lumis_Decode()
+    b = Barrier(3)
+    s = Thread(target=sendThread,args=(socket1, 'testData/binaryData/tempBinary_0', b, 0))
+    r = Thread(target=receiveThread, args=(socket2, b, tool))
+    d = Thread(target=decodeThread,args=(b, tool))
+    s.start()
+    r.start()
+    d.start()
+    r.join()
+
+def receivingProcess_Test():
+    '''
+    测试读取数据进程功能
+    :return:
+    '''
+    _dataChannel = dataChannel_test()
+    s_socket, r_socket = socketpair()
+    b = Barrier(2)
+    s_thread = Thread(name='send binary thread', target=sendThread, args=(s_socket, 'testData/binaryData/DAC280_0825_1707-0826_2052.dat', b,0))
+    i_thread = Thread(name='send order and print message thread', target=orderSimulate, args=(_dataChannel, b))
+    r_thread = Thread(name='data receive thread', target=connectThread, args=(_dataChannel, r_socket))
+    s_thread.start()
+    i_thread.start()
+    r_thread.start()
+    s_thread.join()
+    r_thread.join()
+    print('receivingProcess_Test:', 'end')
+
+def h5fileCanculate():
+    pass
+
+if __name__ == '__main__':
+    receivingProcess_Test()
+
+
+
 
 

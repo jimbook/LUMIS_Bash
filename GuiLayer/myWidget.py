@@ -174,7 +174,7 @@ class setConfigurationDailog_basic(QDialog, Ui_Dialog):
     def exportConfigFile_event(self):
         OK, name = configSaveAsDialog.showDialog()
         if OK:
-            path = os.path.join('.\configurationFile', os.path.splitext(name)[0] + '.lmbc')
+            path = os.path.join('..\configurationFile', os.path.splitext(name)[0] + '.lmbc')
             if os.path.exists(path):
                 if QMessageBox.warning(self, '导出失败', '已经存在同名配置文件，是否覆盖该文件？', QMessageBox.Ok | QMessageBox.Cancel):
                     with open(path, 'wb') as file:
@@ -215,10 +215,9 @@ class setConfigurationDailog_basic(QDialog, Ui_Dialog):
             # 配置偏压
             for j in range(36):
                 if self.checkBox_globalBias.isChecked():
-                    config.setBiasVoltage(self.spinBox_globalBais.value(), boardID=i, channelID=j,
-                                          UnitsVoltage=False)
+                    config.setBiasVoltage(self.spinBox_globalBais.value(), boardID=i, channelID=j)
                 else:
-                    config.setBiasVoltage(l[j + 1], boardID=i, channelID=j, UnitsVoltage=False)
+                    config.setBiasVoltage(l[j + 1], boardID=i, channelID=j)
         # 配置触发模式
         config.setTriggerMode(*_trigger)
         return config.getOrderBytes()
@@ -239,8 +238,6 @@ class setConfigurationDailog_basic(QDialog, Ui_Dialog):
         dialog = setConfigurationDailog()
         dialog.exec_()
         return None
-
-
 
 #todo:根据不同的芯片获取不同的电压转换公式来配置偏压
 from UI.setConfigurtionDailog import Ui_Dialog
@@ -335,9 +332,9 @@ class setConfigurationDailog(QDialog,Ui_Dialog):
             # 配置偏压
             for j in range(36):
                 if self.checkBox_globalBias.isChecked():
-                    config.setBiasVoltage(self.doubleSpinBox_globalBias.value(), boardID=i, channelID=j, UnitsVoltage=True)
+                    config.setBiasVoltage(self.doubleSpinBox_globalBias.value(), boardID=i, channelID=j)
                 else:
-                    config.setBiasVoltage(l[j + 1], boardID=i, channelID=j, UnitsVoltage=True)
+                    config.setBiasVoltage(l[j + 1], boardID=i, channelID=j)
         # 配置触发模式
         config.setTriggerMode(*_trigger)
         return config.getOrderBytes()
@@ -451,5 +448,7 @@ if __name__ == '__main__':
     ex = setConfigurationDailog_basic()
     b = ex._getConfigBinary()
     print(b.hex('-'))
+    with open('../data/config2020_9_5.dat','wb') as file:
+        file.write(b)
     ex.show()
     sys.exit(app.exec_())
