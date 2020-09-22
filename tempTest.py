@@ -70,7 +70,17 @@ def threadTest():
         _task = threading.Thread(target=threadTask,args=(b, i))
         _task.start()
         time.sleep(0.01)
-h = h5Data('data/2020_09_17/tempData_10_04_58.h5', 'r')
-d = h.getData(0)
-print(d)
-print(h.getDataIndex())
+
+def binaryCheck(path: str):
+    with open(path, 'rb') as f:
+        try:
+            buff = f.read()
+            h = buff.index(b'\xfe\xee\xfe\xee')
+            while True:
+                print(buff[h-6:h+12].hex('-'))
+                with open('testData/temporary/txtBinary.txt','a+') as t:
+                    t.write(buff[h-6:h+12].hex('-'))
+                    t.write('\n')
+                h = buff.index(b'\xfe\xee\xfe\xee', h + 2)
+        except:
+            print('end')

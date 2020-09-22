@@ -2,9 +2,9 @@ import time
 import asyncio
 from socket import socketpair, socket
 from threading import Thread,Event ,Barrier
-from dataLayer.shareMemory import dataChannel
+from dataLayer.baseCore import shareStorage
 from dataLayer.connectionTools import Lumis_Decode
-from dataLayer.cordForTest import dataChannel_test, dataReceiveThread_test
+from dataLayer.cordForTest import dataReceiveThread_Test
 
 
 #==============线程函数:辅助测试函数==================
@@ -69,7 +69,7 @@ def decodeThread(_b: Barrier, tool: Lumis_Decode):
     print('decodeThread:', 'start')
     while True:
         try:
-            T, event = tool.decodingOneEventData()
+            event = tool.decodingOneEventData()
         except asyncio.CancelledError:
             break
         badPack = tool.badPackage()
@@ -91,7 +91,7 @@ def decodeThread(_b: Barrier, tool: Lumis_Decode):
     _b.wait()
     print('decodeThread:', 'end')
 
-def orderSimulate(dc: dataChannel, _b: Barrier):
+def orderSimulate(dc: shareStorage, _b: Barrier):
     '''
     --线程--
     模拟GUI向数据接收进程发送指令,然后打印消息队列中的消息
@@ -121,15 +121,15 @@ def orderSimulate(dc: dataChannel, _b: Barrier):
     _b.wait()
     print("orderSimulate:", "end")
 
-def connectThread(dc: dataChannel, s: socket):
+def connectThread(dc: shareStorage, s: socket):
     '''
     --线程--
     模拟接收数据进程
-    :param dc: 数据解码类
+    :param dc: 共享数据类
     :param s: 接收数据的socket
     :return:
     '''
-    asyncio.run(dataReceiveThread_test(_dataChannel=dc, s=s))
+    asyncio.run(dataReceiveThread_Test(share=dc, s=s))
     dc.messageQueue().put((-1, 'the connection process has exited.'))
     print('connectThread:','end')
 
@@ -150,7 +150,7 @@ def LumisDecode_Test():
     socket1, socket2 = socketpair()
     tool = Lumis_Decode()
     b = Barrier(3)
-    s = Thread(target=sendThread,args=(socket1, 'testData/binaryData/tempBinary_0', b, 0))
+    s = Thread(target=sendThread,args=(socket1, 'testData/binaryData/DAC360_0902_2249-0903_1102.dat', b, 0))
     r = Thread(target=receiveThread, args=(socket2, b, tool))
     d = Thread(target=decodeThread,args=(b, tool))
     s.start()
@@ -163,10 +163,10 @@ def receivingProcess_Test():
     测试读取数据进程功能
     :return:
     '''
-    _dataChannel = dataChannel_test()
+    _dataChannel = shareStorage()
     s_socket, r_socket = socketpair()
     b = Barrier(2)
-    s_thread = Thread(name='send binary thread', target=sendThread, args=(s_socket, 'testData/binaryData/DAC280_0825_1707-0826_2052.dat', b,0))
+    s_thread = Thread(name='send binary thread', target=sendThread, args=(s_socket, 'testData/binaryData/DAC360_0902_2249-0903_1102.dat', b,0))
     i_thread = Thread(name='send order and print message thread', target=orderSimulate, args=(_dataChannel, b))
     r_thread = Thread(name='data receive thread', target=connectThread, args=(_dataChannel, r_socket))
     s_thread.start()
