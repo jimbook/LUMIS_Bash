@@ -1,11 +1,10 @@
 import time
-from threading import Thread
-from multiprocessing import Pipe, Manager, Process
 from multiprocessing.connection import Connection
 import h5py
 import numpy as np
 import pandas as pd
-from dataLayer.baseCore import h5Data
+
+
 def threadTask_0(s: Connection,name: str):
     while True:
         s.send(name)
@@ -35,12 +34,18 @@ def task_1():
         df = pd.DataFrame(d[:], columns=[1,2,3])
         print(df)
         time.sleep(1)
+print('temptest')
+import dataFactory
 
 if __name__ == '__main__':
-    # p = Process(target=task_0,args=())
-    # p.start()
-    # time.sleep(3)
-    # task_1()
-    h = h5Data('data/2020_09_22/tempData_11_05_25.h5', 'r')
-    d = h.getData()
-    print(d)
+    d = {'l':1,'a':2}
+    print('l' in d)
+
+    # n = 0
+    # while True:
+    #     h.flush()
+    #     d = h.getData(-1,n)
+    #     n += d.shape[0]
+    #     print(d)
+    #     time.sleep(1)
+

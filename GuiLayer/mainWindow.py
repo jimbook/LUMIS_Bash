@@ -1,29 +1,32 @@
-import os,sys, time
+import os
+import sys
+import time
 import threading
+from multiprocessing import Queue
 from PyQt5 import QtGui
-from dataLayer.shareMemory import dataChannel
 from pyqtgraph.dockarea import *
-from dataLayer.connectionTools import linkGBT
-from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence
-from GuiLayer.myWidget import setConfigurationDailog_basic
-from dataLayer.dataStorage import addDataInMemory
-from dataLayer.constantParameter import _Index
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow
+from GuiLayer.myWidget import setConfigurationDailog_basic
+from dataLayer import _Index
+from dataLayer.connectionTools import linkGBT
+from dataLayer.baseCore import shareStorage
+from dataLayer import dataStorage
 from UI.mainWindow import Ui_MainWindow
 
 class window(QMainWindow,Ui_MainWindow):
     updateSingal = pyqtSignal()
     messageSingal = pyqtSignal(str)
-    def __init__(self,*args,manager = None):
+    def __init__(self,*args,shareChannel: shareStorage):
         super(window, self).__init__(*args)
         self.setupUi(self)
         self.retranslateUi(self)
-        self.setMore(manager)
+        self.setMore(shareChannel)
         self.setEvent()
 
-    def setMore(self,manager):
+    def setMore(self,s: shareStorage):
         self.init_loadConfigIndex()
         self.log = ""
         self.timer_measure = QTimer(self)
@@ -31,32 +34,36 @@ class window(QMainWindow,Ui_MainWindow):
         self.timer = QTimer(self)
         self.time = time.time()
         #从数据服务端获取共享对象
-        self.dataChn = dataChannel(manager)
+        self.dataChn = s
         # 单通道能谱
         self.comboBox_singal_tier.addItems(["0","1","2","3","4","5","6","7"])
-        self.comboBox_singal_channel.addItems(_Index)
+        self.comboBox_singal_channel.addItems(_Index[:-3])
         # 符合能谱
         self.comboBox_coincidence_tier.addItems(["0","1","2","3","4","5","6","7"])
-        self.comboBox_coincidence_showChannel.addItems(_Index)
-        self.comboBox_coincidence_coinChannel.addItems(_Index)
+        self.comboBox_coincidence_showChannel.addItems(_Index[:-3])
+        self.comboBox_coincidence_coinChannel.addItems(_Index[:-3])
         # 开启从数据服务进程接收消息的服务
+        self.orderQueue = Queue()
         t = threading.Thread(target=self.getMessge)
         t.start()
-        # 开启从数据服务进程接收数据的服务
-        t_data = threading.Thread(target=self.synchronizeData)
-        t_data.start()
+        # # 开启从数据服务进程接收数据的服务
+        # t_data = threading.Thread(target=self.synchronizeData)
+        # t_data.start()
         # 数据项
         self.dataInMemory = [] # 内存中的数据
         self.dataInDisk = [] # 硬盘中数据的路径
 
     def setEvent(self):
         #communication event
+        self.pushButton_clockSynchronization.clicked.connect(self.sendClockSynch_event)
         self.pushButton_reset.clicked.connect(self.sendResetOrder_event)
         self.pushButton_config.clicked.connect(self.sendConfigFile_event)
         self.pushButton_dataReceive.clicked.connect(self.switchReceiveDataThread_event)
         self.pushButton_sendCommand.clicked.connect(self.sendShortCommand_evet)
         #plot event
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum_event)
+        self.pushButton_coincidence_addPlot.clicked.connect(self.plotCoincidenceEmergySpectrum_event)
+        self.pushButton_triggerCondition_addPlot.clicked.connect(self.plotTriggerCondition_event)
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
         # stop measurment
@@ -64,6 +71,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.timer.timeout.connect(self.timeOut_event)
         # menu action event
         self.action_configuration.triggered.connect(self.action_configuration_event)
+        self.action_baseline_measureBaseline.connect(self.action_receiveBaselineDataThread_event)
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -81,29 +89,29 @@ class window(QMainWindow,Ui_MainWindow):
     def getMessge(self):
         while True:
             # 从消息队列中获取消息
-            msg = self.dataChn.mq.get() # 会阻塞
+            m = self.dataChn.messageQueue().get() # 会阻塞
+            result, msg = m[0], m[1:]
+            msg = msg[-1]
             self.messageSingal.emit(msg)
-            # 如果此时数据接收已经结束
-            if self.dataChn.dataTag.is_set():
-                # 让配置/开始接收数据按钮可用
-                self.pushButton_sendCommand.setEnabled(True)
-                self.pushButton_config.setEnabled(True)
-                self.pushButton_dataReceive.setEnabled(True)
-                # 让定时器可用
-                self.checkBox_timer.setEnabled(True)
-                self.spinBox_timer_minute.setEnabled(True)
-                self.spinBox_timer_minute.setEnabled(True)
+            # 如果数据正常接收
+            if result == 0:
+                dataStorage.update()
+                self.updateSingal.emit()  # 更新图像
+            else:
+                order = self.orderQueue.get()
+                if result == -1 or result == -2: # 表示数据接收失败
+                    self.setEnableReceiveItem(True)
+                    # todo:
+                elif result == 1 or result == 2:
+                    if order == 0:              # 表示数据接收正常结束
+                        self.setEnableReceiveItem(True)
+                    elif order == 1 or isinstance(order, str): # 数据开始接收，需要重置dataStorage并初始化
+                        self.pushButton_dataReceive.setEnabled(True)
+                        dataStorage.clearAllData()
+                        h5path = self.dataChn.getFilePath()
+                        dataStorage.setH5Path(h5path)
+                        self.updateSingal.emit()  # 更新图像
 
-    # 线程函数：同步数据并更新图像
-    def synchronizeData(self):
-        self.dataChn.dataTag.wait()
-        while True:
-            _newData,_clearTag = self.dataChn.dataStorage.get_newData()
-            if len(_newData) != 0:
-                addDataInMemory(_newData,reset=_clearTag) # 向dataStorage添加新数据
-                self.updateSingal.emit() # 更新图像
-            print("数据同步成功")
-            time.sleep(5)
 
     # 辅助函数：向area中添加图像
     def addPlot(self,widget: QWidget):
@@ -113,6 +121,18 @@ class window(QMainWindow,Ui_MainWindow):
             self.dockArea.addDock(_dock)
         except:
             pass
+
+    # 辅助函数：设置数据接收按钮和定时器可用与否
+    def setEnableReceiveItem(self, a0: bool):
+        # 配置/开始接收数据按钮
+        self.pushButton_sendCommand.setEnabled(a0)
+        self.pushButton_config.setEnabled(a0)
+        self.pushButton_dataReceive.setEnabled(a0)
+        # 定时器
+        self.checkBox_timer.setEnabled(a0)
+        self.spinBox_timer_minute.setEnabled(a0)
+        self.spinBox_timer_hour.setEnabled(a0)
+
 
     # auxiliary/event Function: add message to text Browser
     # 辅助函数/事件：向消息队列中添加消息
@@ -125,6 +145,20 @@ class window(QMainWindow,Ui_MainWindow):
         except:
             import traceback
             traceback.print_exc()
+
+    #事件：连接操作，发送同步时钟指令
+    @pyqtSlot()
+    def sendClockSynch_event(self):
+        try:
+            reply, message = linkGBT.sendCommand(b'\xff\x03')
+            if reply:
+                self.addMessage('已发送同步时钟指令')
+            else:
+                self.addMessage('发送同步时钟命令失败')
+                self.addMessage(message)
+        except Exception as e:
+            self.addMessage('错误：')
+            self.addMessage(e.__str__())
 
     # 事件：连接操作-发送复位命令
     @pyqtSlot()
@@ -171,32 +205,43 @@ class window(QMainWindow,Ui_MainWindow):
         else:
             self.addMessage("只能发送2bytes的命令！")
 
+    # 事件：连接操作-通过管道发送命令来开启/结束基线数据接收线程
+    @pyqtSlot()
+    def action_receiveBaselineDataThread_event(self):
+        try:
+            self.time = time.time()  # 初始化时间
+            self.dataChn.orderPipe(True).send(2)
+            self.orderQueue.put(1)
+            self.pushButton_dataReceive.setText("停止接收数据")
+            # 采集时禁止其他通讯方式使用TCP连接
+            self.setEnableReceiveItem(False)
+            if self.checkBox_timer.isChecked():
+                sec = self.spinBox_timer_hour.value() * 60 * 60 + self.spinBox_timer_minute.value() * 60
+                self.timer_measure.start(sec * 1000)
+            self.timer.start(50)
+        except:
+            import traceback
+            traceback.print_exc()
+
     # event: connect-start or stop data receive thread.Meanwhile,it will show the measuring time.
-    # 事件：连接操作-通过更改标志来开启/结束数据接收线程
+    # 事件：连接操作-通过管道发送命令来开启/结束数据接收线程
     @pyqtSlot(bool)
     def switchReceiveDataThread_event(self,switch: bool):
         try:
             if switch:
                 self.time = time.time() #初始化时间
-                self.dataChn.threadTag.set()
+                self.dataChn.orderPipe(True).send(1)
+                self.orderQueue.put(1)
                 self.pushButton_dataReceive.setText("停止接收数据")
                 # 采集时禁止其他通讯方式使用TCP连接
-                self.pushButton_config.setDisabled(True)
-                self.pushButton_sendCommand.setDisabled(True)
-                # 采集时禁止更改定时器
-                self.checkBox_timer.setDisabled(True)
-                self.spinBox_timer_minute.setDisabled(True)
-                self.spinBox_timer_hour.setDisabled(True)
+                self.setEnableReceiveItem(False)
                 if self.checkBox_timer.isChecked():
                     sec = self.spinBox_timer_hour.value() * 60 * 60 + self.spinBox_timer_minute.value() * 60
                     self.timer_measure.start(sec * 1000)
                 self.timer.start(50)
             else:
-                self.dataChn.threadTag.clear()
-                self.pushButton_dataReceive.setText("开始接收数据")
-                self.pushButton_dataReceive.setDisabled(True)
-                self.addMessage("等待数据服务进程停止接收数据")
-                self.timer.stop()
+                # 调用函数来停止数据接收
+                self.stopMeasurment_event()
         except:
             import traceback
             traceback.print_exc()
@@ -204,7 +249,8 @@ class window(QMainWindow,Ui_MainWindow):
     #事件：停止数据接收（由定时器触发）
     @pyqtSlot()
     def stopMeasurment_event(self):
-        self.dataChn.threadTag.clear()
+        self.dataChn.orderPipe(True).send(0)
+        self.orderQueue.put(0)
         self.pushButton_dataReceive.setText("开始接收数据")
         self.pushButton_dataReceive.setDisabled(True)
         self.addMessage("等待数据服务进程停止接收数据")
@@ -233,6 +279,15 @@ class window(QMainWindow,Ui_MainWindow):
         coincidenceEnergyPlot.changeBaseLine(self.spinBox_coincidence_baseline.value())
         self.addPlot(coincidenceEnergyPlot)
 
+    # 事件：添加触发展示
+    @pyqtSlot()
+    def plotTriggerCondition_event(self):
+        plot = subPlotWin_eventTrackShow()
+        self.updateSingal.connect(plot.dataUpdate)
+        plot.dataUpdate()
+        self.addPlot(plot)
+
+
     # 事件：设置配置参数
     @pyqtSlot()
     def action_configuration_event(self):
@@ -249,15 +304,6 @@ class window(QMainWindow,Ui_MainWindow):
         _sec = _t % 60
         self.lcdNumber_s_ms.display("{:4.2f}".format(_sec))
         self.lcdNumber_h_m.display("{:0>d}:{:0>d}".format(_hour,_min))
-
-    @pyqtSlot(QtGui.QCloseEvent)
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        self.dataChn.processTag.set()
-        if self.pushButton_dataReceive.isChecked():
-            self.switchReceiveDataThread_event(False)
-        self.dataChn.dataTag.wait()
-        super(window, self).closeEvent(a0)
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = window()

@@ -282,11 +282,11 @@ if __name__ == '__main__':
     for i in l.values():
         print(i)
 
-    # c = configuration()
-    # c.setBoardsQuantity(8)
-    # c.setThreshold(280)
-    # c.setBiasVoltage(141)
-    # b = c.getOrderBytes()
-    # print(b.hex('-'))
+    c = configuration()
+    c.setBoardsQuantity(8)
+    c.setThreshold(280)
+    c.setBiasVoltage(141)
+    b = c.getOrderBytes()
+    print(b.hex('-'))
     # with open('../configurationFile/conf.lmbc', 'wb') as f:
     #     f.write(b)

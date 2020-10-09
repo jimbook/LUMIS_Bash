@@ -84,3 +84,6 @@ def binaryCheck(path: str):
                 h = buff.index(b'\xfe\xee\xfe\xee', h + 2)
         except:
             print('end')
+
+if __name__ == '__main__':
+    pass

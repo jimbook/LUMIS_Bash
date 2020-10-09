@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/LUMIS_baseOnTcp.iml" filepath="$PROJECT_DIR$/.idea/LUMIS_baseOnTcp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/LUMIS_Bash.iml" filepath="$PROJECT_DIR$/.idea/LUMIS_Bash.iml" />
     </modules>
   </component>
 </project>

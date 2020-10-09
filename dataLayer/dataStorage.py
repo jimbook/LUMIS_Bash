@@ -5,169 +5,131 @@ import numpy as np
 import pandas as pd
 import os
 from dataLayer import calculationTools
+from dataLayer import _Index
 from dataLayer.baseCore import h5Data
-from inspect import isfunction
-from dataLayer.constantParameter import _Index
 '''
 *****************DATA STRUCTURE*****************
 ==============INPUT DATA STRUCTURE==============
-type: list[list[int]]
-shape:(None,38)
-----------------SUBLIST STRUCTURE---------------
-INDEX   MEAN
-0~35    channel 0~35
-36      triggerID
-37      boardID
-TOTAL LENGTH:38
-==============STORAGE DATA STRUCTURE=============
-------------------dataInMemory-------------------
-type: list[list[int]]
-shape:(None,38)
+----------------DATA STRUCTURE---------------
+type:       DataFrame
+dtype:      int64
+shape:      (None, 38)
 
-SUBLIST STRUCTURE:
-INDEX   MEAN
-0~35    channel 0~35
-36      triggerID
-37      boardID
-TOTAL LENGTH:38
+COL_INDEX   MEAN
+0~35        channel 0~35
+36          triggerID
+37          boardID
+----------------EnergySpectrumData-----------------
+type:       np.array
+dtype:      int64
+shape:(8, 36, 4095)
 
----------------------h5Path-----------------------
-type: str
-mean: path of h5 file
-
----------------------h5Index----------------------
-type: int
-mean: how many DataSets in h5 file are available
-
-----------------EnergySpetrumData-----------------
-type: list[list[list[int]]]
-shape:(0~8,36,4095)
-DATA STRUCTURE:
-AXIS0:boardID           AXIS1:channel           AXIS2:energy spetrum data
+AXIS0:boardID           AXIS1:channel           AXIS2:energy spectrum data
 0~7                     0~35                    0~4094
-
 --------------------statusInfo---------------------
 type: dict
-DATA STRUCTURE:
+
         -KEY-       -value-
-type     int          list
+type     int         tuple
 content  0~8   (TrigDAC,bias,TrigMode)
 
 -------------------baseline------------------------
 
 ==============OUTPUT DATA STRUCTURE==============
 '''
-# 标志位
-_realtime = False # 当前数据为实时测量数据还是离线分析数据
-_reset = False
-# 离线数据
-_dataOffline = pd.DataFrame()
+#==============辅助参数===============
+# 获取到数据的数目/索引(用于寻找新增数据)
+_dataIndex = 0
 
-# 实时测量元数据
-_dataInMemory = []
-_h5Path = ''
-_h5Index = 0
+# h5文件
+_path = ''
 
-
+#=============固定数据============
 # 能谱数据
-_EnergySpetrumData = []
-
-# 状态信息
-_statusInfo = {}
+_EnergySpectrumData = np.zeros((8, 36, 4095)).astype('int64')
 
 # 基线数据
-_baseline = {}
+_baseline = np.zeros((8, 36)).astype('int64')
+
+#***************内部函数*****************
+
+# 新增数据:计算各道能谱，并merge能谱数据
+def mergeEnergySpectrum(newData: pd.DataFrame):
+    global _EnergySpectrumData
+    newSpectrum = calculationTools.ToEnergySpectrumData(newData)
+    _EnergySpectrumData[:newSpectrum.shape[0]] += newSpectrum
+
 #*******************外部函数********************
 
 #----------------input--------------
-# 新增数据:
-# 1.向内存里添加数据
-# 2.计算各道能谱，并向merge能谱数据
-# 3.如果reset置为Ture，下一次载入数据时将会清空内存中的数据，同时将h5Index加一
-def addDataInMemory(newData: list,reset: bool =False):
-    global _h5Index,_reset
-    if _reset:
-        _dataInMemory.clear()
-        _h5Index += 1
-        _reset =False
-    _dataInMemory.extend(newData)
-    _d = pd.DataFrame(newData,columns=_Index)
-    _l = calculationTools.ToEnergySpetrumData(_d)
-    for i in range(len(_l)):
-        tempBoardChannel = _l[i]
-        try:
-            _EnergySpetrumData[i]
-        except IndexError:
-            _EnergySpetrumData.append([])
-        for j in range(len(tempBoardChannel)):
-            try:
-                _EnergySpetrumData[i][j] += tempBoardChannel[j]
-            except IndexError:
-                _EnergySpetrumData[i].append(tempBoardChannel[j])
-    if reset:
-        _reset = True
-
 # 设置h5文件路径和信息
-def setH5Path(h5Path: str,h5Index: int = 0):
-    global _h5Path,_h5Index
+def setH5Path(h5Path: str):
+    global _dataIndex, _path
     if os.path.exists(h5Path):
-        if os.path.splitext(h5Path)[0] == '.h5':
-            _h5Path = h5Path
-            _h5Index = h5Index
+        if os.path.splitext(h5Path)[-1] == '.h5':
+            _path = h5Path
+            _dataIndex = 0
         else:
             raise Exception('File with extension .{} is not support.'.format(os.path.splitext(h5Path)[0]))
     else:
         raise FileNotFoundError('{} can not found.'.format(h5Path))
 
+# 更新一次数据（当前只更新能谱数据）
+def update():
+    global _dataIndex, _path
+    h5 = h5Data(_path,'r')
+    newData = h5.getData(-2, _dataIndex)
+    mergeEnergySpectrum(newData)
+    _dataIndex += newData.shape[0]
+    print(getEnergySpetrumData(0,16),h5.getFileName(),h5.index[:])
+
 #---------------clear--------------
-# 清空所有数据(暂时只清空元数据和能谱数据)
+# 清空所有数据(暂时只清空索引记录、h5文件指向、能谱数据和基线数据)
 def clearAllData():
-    global _h5Index,_h5Path
-    _dataInMemory.clear()
-    _EnergySpetrumData.clear()
-    _h5Index = 0
-    _h5Path = ''
+    global _dataIndex, _path, _baseline, _EnergySpectrumData
+    _dataIndex = 0
+    _path = ''
+    _baseline = np.zeros((8, 36)).astype('int64')
+    _EnergySpectrumData = np.zeros((8, 36, 4095)).astype('int64')
 
 # 清空能谱数据
 def clearEnergySpetrumData():
-    _EnergySpetrumData.clear()
+    _EnergySpectrumData = np.zeros((8, 36, 4095)).astype('int64')
 
 # 重置基线设置
 def resetBaseline():
-    _baseline.clear()
-
+    _baseline = np.zeros((8, 36)).astype('int64')
 #--------------output-------------
+# 获取h5数据指向
+def getH5Data() -> h5Data:
+    global _path
+    return h5Data(_path,'r')
 
-# 获取内存中的数据
-def getDataInMemory(startIndex: int = 0,asDataFrame: bool = True):
-    if asDataFrame:
-        _d = pd.DataFrame(_dataInMemory[startIndex:],columns=_Index)
-        return _d
-    else:
-        return _dataInMemory
+# 获取当前读取到的索引位置(行数)
+def getDataIndex():
+    return _dataIndex
 
-# 获取内存中数据的大小(行数)
-def getSizeInMemory():
-    return len(_dataInMemory)
-
-# 对所有数据进行计算，返回结果
-def calculationAllData(MapFunc,reduceFunc):
+# 对数据进行计算，返回结果
+def calculationData(MapFunc, reduceFunc = None, startIndex: int = 0):
     '''
     :param MapFunc: 计算函数，要求接收一个无重复triggerID的标准结构DataFrame参数，对DataFrame进行计算，返回结果R
     :param reduceFunc: 对MapFunc返回的结果进行merge，要求可以输入两个参数,返回两个参数merge后的结果
-    :return:
+    :return:(result, index)
     '''
-    if not (isfunction(MapFunc) and isfunction(reduceFunc)):
+    if not (callable(MapFunc) and (callable(reduceFunc) or reduceFunc is None)):
         raise ValueError('Input parameter should be function.')
-    global _h5Path,_h5Index
-    _d = pd.DataFrame(_dataInMemory,columns=_Index)
-    _r = MapFunc(_d)
-    file = h5Data(_h5Path,mode='r')
-    for i in range(_h5Index):
-        _d = pd.DataFrame(file.getData(i),columns=_Index)
-        reduceFunc(_r,MapFunc(_d))
-    file.close()
-    return _r
+    global _path
+    h5 = h5Data(_path, 'r')
+    if reduceFunc is None:
+        _d = h5.getData(-2, startIndex=startIndex)
+        return MapFunc(_d), startIndex + _d.shape[0]
+    else:
+        _d = h5.getData(0, startIndex=startIndex)
+        _r = MapFunc(_d)
+        for i in range(1, h5.index.shape[0]):
+            _d = pd.DataFrame(h5.getData(i), columns=_Index)
+            reduceFunc(_r, MapFunc(_d))
+        return _r, startIndex + _d.shape[0]
 
 # 获取能谱数据
 def getEnergySpetrumData(tier: int,channel: int or str):
@@ -175,15 +137,20 @@ def getEnergySpetrumData(tier: int,channel: int or str):
         chnIndex = _Index.index(channel)
     else:
         chnIndex = channel
-    try:
-        rdata = _EnergySpetrumData[tier][chnIndex]
-    except IndexError:
-        rdata = np.zeros(2**12-1)
+    rdata = _EnergySpectrumData[tier][chnIndex]
     return rdata
 
 # 获取基线
-def getBaseline(tier: int, channel: int):
-    return _baseline.get(tier,np.zeros(32))[channel]
+def getBaseline(tier: int = None, channel: int = None):
+    if tier is None and channel is None:
+        return _baseline
+    else:
+        if tier is  None:
+            raise ValueError('When a channel is specified, argument(tier) cannot be None.')
+        if channel is None:
+            return _baseline[tier]
+        else:
+            return _baseline[tier][channel]
 
 if __name__ == "__main__":
     import pyqtgraph.examples
