@@ -235,7 +235,7 @@ class setConfigurationDailog_basic(QDialog, Ui_Dialog):
     @staticmethod
     # 开启当前对话框
     def dialogShow():
-        dialog = setConfigurationDailog()
+        dialog = setConfigurationDailog_basic()
         dialog.exec_()
         return None
 
@@ -448,7 +448,7 @@ if __name__ == '__main__':
     ex = setConfigurationDailog_basic()
     b = ex._getConfigBinary()
     print(b.hex('-'))
-    with open('../data/config2020_9_5.dat','wb') as file:
+    with open('../configurationFile/config2020_9_5.dat','wb') as file:
         file.write(b)
     ex.show()
     sys.exit(app.exec_())

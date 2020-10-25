@@ -48,13 +48,24 @@ class linkGBT(object):
     @staticmethod
     def sendConfigFile(input: str):
         global _devIP,_TCPport
+
         with open(input,mode="rb") as file:
             data = file.read()
         try:
             link = socket.socket()
             link.connect((_devIP,_TCPport))
-            link.send(data)
-            time.sleep(0.1)
+            if os.path.splitext(input)[1] == '.lmbc':
+                head = 0
+                while True:
+                    tail = data.find(b'\xee\xee',head)
+                    if tail < 0:
+                        break
+                    link.send(data[head:tail + 2])
+                    head = tail + 2
+                    time.sleep(0.1)
+            else:
+                link.send(data)
+                time.sleep(0.1)
             link.close()
             return True,None
         except Exception as e:
@@ -286,6 +297,10 @@ class Lumis_Decode(object):
                 # 将设备状态信息更新
                 self._statusBuff[statusData[-1]] = tuple(statusData[:-1])
                 # 如果在同一个事件中，则将数据存储在事件缓存区中,同时将triggerID改为软件计数器的计数
+                if len(self._eventBuff) > 0 and self._eventBuff[-1][-1] == chargeData[-1]:
+                    with open("errorlog.txt",'a+') as file:
+                        file.write(chargeData[-3:])
+                        file.write('\n')
                 if self._temTID == chargeData[-2]:
                     chargeData[-2] = self._eventCount
                     self._eventBuff.append(chargeData)

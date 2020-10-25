@@ -15,7 +15,7 @@ if __name__ == "__main__":
         e = Event()
         shareManage = Process(target=getShare,args=(True,))
         shareManage.start()
-        time.sleep(1)
+        time.sleep(5)
         p = Process(target=ConnectProcess)
         p.start()
         shareStorge = getShare(False)

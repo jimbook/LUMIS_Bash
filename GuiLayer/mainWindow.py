@@ -3,22 +3,24 @@ import sys
 import time
 import threading
 from multiprocessing import Queue
+import numpy as np
 from PyQt5 import QtGui
 from pyqtgraph.dockarea import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow
+from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow, subPlotWin_eventXYTrackShow
 from GuiLayer.myWidget import setConfigurationDailog_basic
 from dataLayer import _Index
 from dataLayer.connectionTools import linkGBT
-from dataLayer.baseCore import shareStorage
+from dataLayer.baseCore import shareStorage, h5Data
 from dataLayer import dataStorage
 from UI.mainWindow import Ui_MainWindow
 
 class window(QMainWindow,Ui_MainWindow):
-    updateSingal = pyqtSignal()
+    updateSingal = pyqtSignal(int)
     messageSingal = pyqtSignal(str)
+
     def __init__(self,*args,shareChannel: shareStorage):
         super(window, self).__init__(*args)
         self.setupUi(self)
@@ -64,6 +66,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_singal_addPlot.clicked.connect(self.plotSingalEnergySpectum_event)
         self.pushButton_coincidence_addPlot.clicked.connect(self.plotCoincidenceEmergySpectrum_event)
         self.pushButton_triggerCondition_addPlot.clicked.connect(self.plotTriggerCondition_event)
+        self.pushButton_XYTriggerCondition_addPlot.clicked.connect(self.plotXYTrtggerCondition_event)
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
         # stop measurment
@@ -71,7 +74,9 @@ class window(QMainWindow,Ui_MainWindow):
         self.timer.timeout.connect(self.timeOut_event)
         # menu action event
         self.action_configuration.triggered.connect(self.action_configuration_event)
-        self.action_baseline_measureBaseline.connect(self.action_receiveBaselineDataThread_event)
+        self.action_baseline_measureBaseline.triggered.connect(self.action_receiveBaselineDataThread_event)
+        self.action_offlineDataShow.triggered.connect(self.action_offlineDataShow_event)
+        self.action_dataPlayBack.triggered.connect(self.action_dataPlayBack_event)
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -96,7 +101,7 @@ class window(QMainWindow,Ui_MainWindow):
             # 如果数据正常接收
             if result == 0:
                 dataStorage.update()
-                self.updateSingal.emit()  # 更新图像
+                self.updateSingal.emit(0)  # 更新图像
             else:
                 order = self.orderQueue.get()
                 if result == -1 or result == -2: # 表示数据接收失败
@@ -110,8 +115,7 @@ class window(QMainWindow,Ui_MainWindow):
                         dataStorage.clearAllData()
                         h5path = self.dataChn.getFilePath()
                         dataStorage.setH5Path(h5path)
-                        self.updateSingal.emit()  # 更新图像
-
+                        self.updateSingal.emit(0)  # 更新图像
 
     # 辅助函数：向area中添加图像
     def addPlot(self,widget: QWidget):
@@ -132,7 +136,6 @@ class window(QMainWindow,Ui_MainWindow):
         self.checkBox_timer.setEnabled(a0)
         self.spinBox_timer_minute.setEnabled(a0)
         self.spinBox_timer_hour.setEnabled(a0)
-
 
     # auxiliary/event Function: add message to text Browser
     # 辅助函数/事件：向消息队列中添加消息
@@ -287,12 +290,64 @@ class window(QMainWindow,Ui_MainWindow):
         plot.dataUpdate()
         self.addPlot(plot)
 
+    #事件：添加xy触发展示
+    @pyqtSlot()
+    def plotXYTrtggerCondition_event(self):
+        plot = subPlotWin_eventXYTrackShow()
+        self.updateSingal.connect(plot.dataUpdate)
+        plot.dataUpdate()
+        self.addPlot(plot)
 
-    # 事件：设置配置参数
+    # 菜单事件：设置配置参数
     @pyqtSlot()
     def action_configuration_event(self):
         setConfigurationDailog_basic().dialogShow()
         self.init_loadConfigIndex()
+
+    # 菜单事件：离线数据显示
+    @pyqtSlot()
+    def action_offlineDataShow_event(self):
+        # if self.pushButton_dataReceive.isChecked():
+        #     QMessageBox.warning(self,'警告','不能在测量时进行离线数据显示')
+        # else:
+        path = QFileDialog.getOpenFileName(self,'选择离线数据','./data','dataFile (*.h5)')[0]
+        dataStorage.clearAllData()
+        dataStorage.setH5Path(path)
+        dataStorage.update()
+        self.updateSingal.emit(1)
+
+    # 菜单事件：数据回放
+    @pyqtSlot()
+    def action_dataPlayBack_event(self):
+        if self.pushButton_dataReceive.isChecked():
+            QMessageBox.warning(self,'警告','不能在测量时进行数据回放')
+        else:
+            print('file')
+            filePath = QFileDialog.getOpenFileName(self, '选择回放数据' ,'./data',"数据文件 (*.h5)")[0]
+            t = threading.Thread(target=self.dataPlayBack_thread, args=(filePath,))
+            t.start()
+
+    # 线程函数：数据回放
+    def dataPlayBack_thread(self,h5dataPath: str):
+        dataStorage.initPlayBackModule()
+        print('init')
+        h5 = h5Data(h5dataPath,'r')
+        print(h5.index.shape)
+        for i in range(h5.index.shape[0]):
+            tmpData = h5.getData(i)
+            k = 0
+            u,idx = np.unique(tmpData[_Index[-2]],True)
+            while k + 300 < idx.shape[0]:
+                dataStorage.playBackAddData(tmpData[idx[k]:idx[k+300]].values)
+                self.updateSingal.emit(0)
+                k += 300
+            dataStorage.playBackAddData(tmpData[idx[k]:].values)
+            self.updateSingal.emit(0)
+            dataStorage.playBackNewSet()
+        dataStorage.EndPlayBackModule()
+
+
+
 
     #auxiliary: erver interval will call this function to refresh clock widget
     #辅助函数：每过一个时间间隔将会调用一次，来刷新时间显示控件显示的时间

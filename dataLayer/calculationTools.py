@@ -111,6 +111,11 @@ def MarkOneEvent(event: pd.DataFrame) -> int:
 
 # 从一段数据中选择一个较好事件
 def ChooseGoodEvent(data: pd.DataFrame) -> pd.DataFrame:
+    '''
+
+    :param data:
+    :return: shape = (None, 38),triggerID被扔掉
+    '''
     triggerID = np.unique(data[_Index[-2]].values)
     boardNum = np.unique(data[_Index[-1]].values).shape[0]
     d = data.set_index('triggerID')

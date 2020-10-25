@@ -12,7 +12,7 @@ from UI.myPlot import Ui_Form
 from dataLayer.calculationTools import ToCoincidentEnergySpetrumData, ChooseGoodEvent
 from dataLayer import dataStorage
 import functools
-from GuiLayer.myPlotItem import boardBarsPlot
+from GuiLayer.myPlotItem import boardBarsPlot, xyBoardsPlot
 
 #单通道能谱图像
 class subPlotWin_singal(Ui_Form,QWidget):
@@ -118,12 +118,18 @@ class subPlotWin_coincidence(QWidget,Ui_Form):
         self.plotUpdate()
 
     # 更新数据
-    @pyqtSlot()
-    def dataUpdate(self):
-        d, self.index_memory = dataStorage.calculationData(self.DataFunc,startIndex=self.index_memory)
-        self.energy_data = d
-        print("index", self.index_memory)
-        print("plotUpdate")
+    @pyqtSlot(int)
+    def dataUpdate(self,reset: int):
+        '''
+
+        :param reset: 当reset为1时，重置数据索引
+        :return:
+        '''
+        if reset == 1:
+            self.energy_data, self.index_memory = dataStorage.calculationData(self.DataFunc)
+        else:
+            d, self.index_memory = dataStorage.calculationData(self.DataFunc,startIndex=self.index_memory)
+            self.energy_data += d
         self.plotUpdate()
 
     # 更新图像
@@ -143,8 +149,8 @@ class subPlotWin_coincidence(QWidget,Ui_Form):
         
 #触发事件图像
 class subPlotWin_eventTrackShow(QScrollArea):
-    def __init__(self):
-        super(subPlotWin_eventTrackShow, self).__init__()
+    def __init__(self,*args):
+        super(subPlotWin_eventTrackShow, self).__init__(*args)
         self.setMore()
 
     def setMore(self):
@@ -160,13 +166,65 @@ class subPlotWin_eventTrackShow(QScrollArea):
             self.containerWidget.layout().addWidget(b)
         self.setWidget(self.containerWidget)
 
-    def Event(self):
-        pass
 
     def setData(self, data: np.array):
         if data.shape[1] >= 38:
             for i in range(data.shape[0]):
                 self.boardList[i].setBoardData(data[i])
+        else:
+            raise ValueError('The shape of argument(data) should be (39,1~8)')
+
+    def dataUpdate(self):
+        event, self.index_memory = dataStorage.calculationData(ChooseGoodEvent, startIndex=self.index_memory)
+        self.setData(event.values)
+        print('event update')
+        self.containerWidget.repaint()
+
+# xy触发事件图像
+class subPlotWin_eventXYTrackShow(QScrollArea):
+    def __init__(self,*args):
+        super(subPlotWin_eventXYTrackShow, self).__init__(*args)
+        self.setMore()
+
+    def setMore(self):
+        self.setWindowTitle('触发事件_xy')
+        self.index_memory = 0
+        self.boardList = []
+        self.xyList = []
+        self.containerWidget = QWidget()
+        self.containerWidget.setMinimumSize(1200, 170 * 4 + 10)
+        layout = QGridLayout(self.containerWidget)
+        self.containerWidget.setLayout(layout)
+        for i in range(4):
+            for j in range(2):
+                b = boardBarsPlot(boardNum=i*2 + j)
+                self.boardList.append(b)
+                layout.addWidget(b, i, j)
+        layout_xy_0 = QHBoxLayout(self)
+        layout_xy_1 = QHBoxLayout(self)
+        for i in range(4):
+            _xy = xyBoardsPlot(boardNum=i)
+            self.xyList.append(_xy)
+            if i < 2:
+                layout_xy_0.addWidget(_xy)
+            else:
+                layout_xy_1.addWidget(_xy)
+        w_0 = QWidget()
+        w_0.setLayout(layout_xy_0)
+        w_0.setMinimumSize(480,480)
+        w_1 = QWidget()
+        w_1.setLayout(layout_xy_1)
+        w_1.setMinimumSize(480,480)
+        layout.addWidget(w_0, 4, 0)
+        layout.addWidget(w_1, 4, 1)
+        self.setWidget(self.containerWidget)
+
+    def setData(self, data: np.array):
+        if data.shape[1] >= 38:
+            for i in range(data.shape[0]):
+                self.boardList[i].setBoardData(data[i])
+            for i in range(int(data.shape[0]/2)):
+                self.xyList[i].setBoardsData(xData=data[i*2],yData=data[i*2+1])
         else:
             raise ValueError('The shape of argument(data) should be (39,1~8)')
 
@@ -185,8 +243,8 @@ if __name__ == "__main__":
     # ex = subPlotWin_singal()
     # ex._setData(d1, 1, "chn_0", False)
     # ex.show()
-    demo = subPlotWin_eventTrackShow()
-    n = np.zeros((8, 39), 'int64')
+    demo = subPlotWin_eventXYTrackShow()
+    n = np.zeros((8, 38), 'int64')
     for i in range(8):
         r = np.random.random(4)
         n[i][int(r[0] * 32)] = int(r[1] * 500 + 350)

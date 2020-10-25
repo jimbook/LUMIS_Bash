@@ -1,8 +1,11 @@
 import numpy as np
 import h5py
 import time
+import pandas as pd
 from datetime import datetime, timedelta
 from dataLayer.baseCore import h5Data
+from collections import  Counter
+import dataLayer
 import asyncio
 def newBinary():
     with open('testData/binaryData/DAC360_0902_2249-0903_1102.dat','rb') as file:
@@ -86,4 +89,12 @@ def binaryCheck(path: str):
             print('end')
 
 if __name__ == '__main__':
-    pass
+    import os
+    file = h5Data('./data/2020_10_25/tempData_11_51_16.h5','r')
+    #file = h5Data('./testData/h5Data/tempData_10.22_21_38_13.h5', 'r')
+    data = file.getData(-2)
+    board = data[dataLayer._Index[-1]].values
+    triggerID = data[dataLayer._Index[-2]].values
+    count1 = pd.DataFrame(dict(Counter(triggerID)),index=[0]).values[0]
+    output = Counter(count1)
+    print(output)

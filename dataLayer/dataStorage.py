@@ -41,8 +41,11 @@ content  0~8   (TrigDAC,bias,TrigMode)
 # 获取到数据的数目/索引(用于寻找新增数据)
 _dataIndex = 0
 
-# h5文件
+# h5文件路径
 _path = ''
+
+# playBack文件
+_playBackData: h5Data = None
 
 #=============固定数据============
 # 能谱数据
@@ -82,6 +85,35 @@ def update():
     mergeEnergySpectrum(newData)
     _dataIndex += newData.shape[0]
     print(getEnergySpetrumData(0,16),h5.getFileName(),h5.index[:])
+
+#------------playBack--------------
+# 初始化数据回放
+def initPlayBackModule():
+    global _path, _playBackData
+    _path = './playBack.h5'
+    _dataIndex = 0
+    _playBackData = h5Data(_path,'w')
+
+# 向h5中添加数据
+def playBackAddData(data: np.array, newset: bool = False):
+    global _playBackData
+    _playBackData.addToDataSet(data)
+    _playBackData.flush()
+    update()
+
+# 向h5中添加新数据集
+def playBackNewSet():
+    _playBackData.newSets()
+
+
+
+
+# 结束数据回放
+def EndPlayBackModule():
+    global _playBackData
+    clearAllData()
+    _playBackData = None
+
 
 #---------------clear--------------
 # 清空所有数据(暂时只清空索引记录、h5文件指向、能谱数据和基线数据)

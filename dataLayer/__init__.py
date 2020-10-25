@@ -17,5 +17,5 @@ class sizeUnit_binary(Enum):
     MB = 1024 * 1024
 
 # ---------共享数据地址---------
-_address = ("127.0.0.1", 50000)
+_address = ("127.0.0.1", 50001)
 _authkey = b'jimbook'

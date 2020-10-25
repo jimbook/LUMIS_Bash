@@ -43,6 +43,8 @@
     </widget>
     <addaction name="menu_2"/>
     <addaction name="action_configuration"/>
+    <addaction name="action_dataPlayBack"/>
+    <addaction name="action_offlineDataShow"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -71,14 +73,14 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="page_linkBehave">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>364</width>
+          <width>314</width>
           <height>348</height>
          </rect>
         </property>
@@ -550,13 +552,13 @@
         <attribute name="label">
          <string>检测工具</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_9">
+        <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
           <widget class="QGroupBox" name="groupBox_6">
            <property name="title">
             <string>触发事件</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_15">
               <item>
@@ -575,6 +577,24 @@
               </item>
              </layout>
             </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <item>
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>XY触发情况：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_XYTriggerCondition_addPlot">
+                <property name="text">
+                 <string>添加图像</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </widget>
          </item>
@@ -586,7 +606,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>232</height>
+             <height>195</height>
             </size>
            </property>
           </spacer>
@@ -631,6 +651,16 @@
   <action name="action_baseline_measureBaseline">
    <property name="text">
     <string>测量基线数据</string>
+   </property>
+  </action>
+  <action name="action_dataPlayBack">
+   <property name="text">
+    <string>数据回放</string>
+   </property>
+  </action>
+  <action name="action_offlineDataShow">
+   <property name="text">
+    <string>离线数据显示</string>
    </property>
   </action>
  </widget>
