@@ -297,10 +297,6 @@ class Lumis_Decode(object):
                 # 将设备状态信息更新
                 self._statusBuff[statusData[-1]] = tuple(statusData[:-1])
                 # 如果在同一个事件中，则将数据存储在事件缓存区中,同时将triggerID改为软件计数器的计数
-                if len(self._eventBuff) > 0 and self._eventBuff[-1][-1] == chargeData[-1]:
-                    with open("errorlog.txt",'a+') as file:
-                        file.write(chargeData[-3:])
-                        file.write('\n')
                 if self._temTID == chargeData[-2]:
                     chargeData[-2] = self._eventCount
                     self._eventBuff.append(chargeData)
@@ -613,13 +609,17 @@ def dataDecode(h5: h5Data, decodeTool: Lumis_Decode):
         # 因此避免了第一次判断triggerID为零时判断为置零
         if event.shape[0] != 0:
             h5.addToDataSet(event)
+            eventID = event[0][-2]
+        else:
+            eventID = 0
         h5.putDeviceStatus(decodeTool.devStatus())
         while True:
             event = decodeTool.decodingOneEventData()
             # 将数据导入h5文件中（需要检查当前事件是否全为空包）
             if event.shape[0] != 0:
-                if event[0][-2] == 0:
+                if event[0][-2] < eventID:
                     h5.newSets()
+                eventID = event[0][-2]
                 h5.addToDataSet(event)
     except asyncio.CancelledError:
         pass

@@ -90,11 +90,15 @@ def binaryCheck(path: str):
 
 if __name__ == '__main__':
     import os
-    file = h5Data('./data/2020_10_25/tempData_11_51_16.h5','r')
-    #file = h5Data('./testData/h5Data/tempData_10.22_21_38_13.h5', 'r')
-    data = file.getData(-2)
+    #file = h5Data('./data/2020_10_25/tempData_17_03_07.h5','r')
+    file = h5Data('./testData/h5Data/tempData_10.22_21_38_13.h5', 'r')
+    def count(input: np.array):
+        return pd.DataFrame(dict(Counter(input)),index=[0])
+    data = file.getData(0)
     board = data[dataLayer._Index[-1]].values
     triggerID = data[dataLayer._Index[-2]].values
-    count1 = pd.DataFrame(dict(Counter(triggerID)),index=[0]).values[0]
-    output = Counter(count1)
+    count1 = count(triggerID)
+    print(count1.T)
+    print(data[data[dataLayer._Index[-2]] == 11])
+    output = count(count1.values[0]).sort_index(1)
     print(output)

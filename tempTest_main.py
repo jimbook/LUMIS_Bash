@@ -35,14 +35,14 @@ def sendThread(_s: socket, path: str, sleep: float = 0.1):
     time.sleep(100)
     _s.close()
 
-binaryPath = 'testData/binaryData/nowData/20200930_1140-2109.dat'
+binaryPath =  './testData/binaryData/20201025_1315.dat'#'testData/binaryData/nowData/20200930_1140-2109.dat'
 if __name__ == '__main__':
     m_thread = Process(name='share data manager', target=getShare, args=(True,))
     m_thread.start()
     time.sleep(3)
     dataChannel = getShare(False)
     s_socket, r_socket = socketpair()
-    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, 'testData/binaryData/nowData/20200930_1140-2109.dat'))
+    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, binaryPath))
     r_thread = Process(name='data receive thread', target=connectThread, args=(dataChannel, r_socket))
     s_thread.start()
     r_thread.start()
