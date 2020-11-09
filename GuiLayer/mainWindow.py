@@ -360,7 +360,5 @@ class window(QMainWindow,Ui_MainWindow):
         self.lcdNumber_s_ms.display("{:4.2f}".format(_sec))
         self.lcdNumber_h_m.display("{:0>d}:{:0>d}".format(_hour,_min))
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = window()
-    ex.show()
-    sys.exit(app.exec_())
+    import pyqtgraph.examples
+    pyqtgraph.examples.run()

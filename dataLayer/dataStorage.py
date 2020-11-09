@@ -105,15 +105,11 @@ def playBackAddData(data: np.array, newset: bool = False):
 def playBackNewSet():
     _playBackData.newSets()
 
-
-
-
 # 结束数据回放
 def EndPlayBackModule():
     global _playBackData
     clearAllData()
     _playBackData = None
-
 
 #---------------clear--------------
 # 清空所有数据(暂时只清空索引记录、h5文件指向、能谱数据和基线数据)

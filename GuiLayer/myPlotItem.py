@@ -14,7 +14,7 @@ class boardBarsPlot(QWidget):
     def setMore(self):
         self.setGeometry(300, 300, 1400, 150)
         self.boardData = np.zeros(32,'int64')
-        self.setMinimumSize(1000, 140)
+        self.setMinimumSize(850, 120)
         self.barSize = 5
         palette = QPalette()
         palette.setColor(self.backgroundRole(), QColor(255,255,255))

@@ -147,6 +147,8 @@ def translateTemperature(data: np.array) -> np.array:
     result[minus] = -( (~value[minus] + 1) / 16)
     return result
 
+# 轨迹测试
+
 if __name__ == '__main__':
     pass
 

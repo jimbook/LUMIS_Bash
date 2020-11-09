@@ -20,10 +20,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2327fb3-c01f-48b6-bf83-d0901e10a5a3" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/dataLayer/threeDCalculate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/threeD.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tmpStorage/bl.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tmpStorage/mean_scale.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tmpStorage/tr.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataLayer/connectionTools.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/connectionTools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tempTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tempTest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tempTest_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/tempTest_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GuiLayer/mainWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/GuiLayer/mainWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataLayer/calculationTools.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/calculationTools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataLayer/dataStorage.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/dataStorage.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,22 +53,23 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/testData/binaryData" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tmpStorage" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\csvData" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\tmpStorage" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\binaryData" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\h5Data" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\configurationFile" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\binaryData\nowData" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\csvData" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python.tempTest">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.myPlotWidget">
+    <configuration name="mainWindow" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -71,11 +77,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GuiLayer" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GuiLayer/mainWindow.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -126,27 +132,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="tempTest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="LUMIS_Bash" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tempTest.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="tempTest_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -168,13 +153,34 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="threeD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="LUMIS_Bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/threeD.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.tempTest" />
-        <item itemvalue="Python.tempTest_main" />
         <item itemvalue="Python.myPlotWidget" />
+        <item itemvalue="Python.tempTest_main" />
         <item itemvalue="Python.myPlotItem" />
-        <item itemvalue="Python.main" />
+        <item itemvalue="Python.mainWindow" />
+        <item itemvalue="Python.threeD" />
       </list>
     </recent_temporary>
   </component>
@@ -232,38 +238,38 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="261" key="GridCell.Tab.-1.right/0.0.1536.824@0.0.1536.824" timestamp="1601010616943" />
-    <state width="1515" height="258" key="GridCell.Tab.0.bottom" timestamp="1603628681693">
+    <state width="1515" height="190" key="GridCell.Tab.0.bottom" timestamp="1604928811029">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
     <state width="2027" height="389" key="GridCell.Tab.0.bottom/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544233" />
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="258" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1603628681693" />
-    <state width="1515" height="258" key="GridCell.Tab.0.center" timestamp="1603628681693">
+    <state width="1515" height="190" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1604928811029" />
+    <state width="1515" height="190" key="GridCell.Tab.0.center" timestamp="1604928811029">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.center/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
     <state width="2027" height="389" key="GridCell.Tab.0.center/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544233" />
     <state width="2027" height="304" key="GridCell.Tab.0.center/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="2027" height="304" key="GridCell.Tab.0.center/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="258" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1603628681693" />
-    <state width="1515" height="258" key="GridCell.Tab.0.left" timestamp="1603628681693">
+    <state width="1515" height="190" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1604928811029" />
+    <state width="1515" height="190" key="GridCell.Tab.0.left" timestamp="1604928811029">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.left/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715266" />
     <state width="2027" height="389" key="GridCell.Tab.0.left/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544233" />
     <state width="2027" height="304" key="GridCell.Tab.0.left/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="2027" height="304" key="GridCell.Tab.0.left/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="258" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1603628681693" />
-    <state width="1515" height="258" key="GridCell.Tab.0.right" timestamp="1603628681693">
+    <state width="1515" height="190" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1604928811029" />
+    <state width="1515" height="190" key="GridCell.Tab.0.right" timestamp="1604928811029">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.right/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
     <state width="2027" height="389" key="GridCell.Tab.0.right/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544233" />
     <state width="2027" height="304" key="GridCell.Tab.0.right/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="2027" height="304" key="GridCell.Tab.0.right/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="258" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1603628681693" />
+    <state width="1515" height="190" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1604928811029" />
     <state width="1515" height="258" key="GridCell.Tab.1.bottom" timestamp="1603628681694">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
