@@ -174,7 +174,7 @@ class setConfigurationDailog_basic(QDialog, Ui_Dialog):
     def exportConfigFile_event(self):
         OK, name = configSaveAsDialog.showDialog()
         if OK:
-            path = os.path.join('..\configurationFile', os.path.splitext(name)[0] + '.lmbc')
+            path = os.path.join('.//configurationFile', os.path.splitext(name)[0] + '.lmbc')
             if os.path.exists(path):
                 if QMessageBox.warning(self, '导出失败', '已经存在同名配置文件，是否覆盖该文件？', QMessageBox.Ok | QMessageBox.Cancel):
                     with open(path, 'wb') as file:

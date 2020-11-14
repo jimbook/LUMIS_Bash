@@ -33,7 +33,7 @@ class h5Data(object):
         └index(dataSet)
           └index
     '''
-    def __init__(self, path: str, mode: str = 'w'):
+    def __init__(self, path: str, mode: str = 'r'):
         '''
         :param path: the path of h5 file
         :param mode: "w" or "r"

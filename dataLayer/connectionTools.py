@@ -644,7 +644,7 @@ def createH5File(fileName: str = None) -> h5Data:
         h5Path = os.path.join(dirPath, 'tempData_' + nowTime + '.h5')
     else:
         h5Path = os.path.join(dirPath, fileName.split('.')[0] + '.h5')
-    h5 = h5Data(h5Path)
+    h5 = h5Data(h5Path,"w")
     return h5
 
 # =====进程函数/主函数======
