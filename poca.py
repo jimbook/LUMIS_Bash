@@ -131,7 +131,7 @@ class POCA_Analysis(object):
         return self.p0 + (self.u * self.sc) - (dP * self.sc)
 
     def get_angle(self):
-        costheta = np.dot(self.u, self.v) / np.linalg.norm(self.u) * np.linalg.norm(self.v)
+        costheta = np.dot(self.u, self.v) / (np.linalg.norm(self.u) * np.linalg.norm(self.v))
         sintheta = math.sqrt(1 - costheta ** 2)
         thetaR = math.asin(sintheta)
         theta = thetaR * 180 / math.pi

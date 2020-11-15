@@ -20,18 +20,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2327fb3-c01f-48b6-bf83-d0901e10a5a3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Ratio.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/calculateForNumba.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/poca.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GuiLayer/myWidget.py" beforeDir="false" afterPath="$PROJECT_DIR$/GuiLayer/myWidget.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataFactory/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataFactory/dataItem.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataFactory/dataStorage.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataFactory/productionLine.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataLayer/baseCore.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/baseCore.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataLayer/connectionTools.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/connectionTools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ratio.py" beforeDir="false" afterPath="$PROJECT_DIR$/Ratio.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataLayer/calculateForNumba.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/calculateForNumba.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataLayer/threeDCalculate.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/threeDCalculate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poca.py" beforeDir="false" afterPath="$PROJECT_DIR$/poca.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -115,27 +108,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="poca" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="LUMIS_Bash" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/poca.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -157,7 +129,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="threeDCalculate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="tmpTest_forCUDA" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -165,11 +137,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataLayer" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataLayer/threeDCalculate.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tmpTest_forCUDA.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -178,13 +150,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest in tmpTest_forCUDA.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="LUMIS_Bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tmpTest_forCUDA.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.Ratio" />
-        <item itemvalue="Python.poca" />
         <item itemvalue="Python.calculateForNumba" />
-        <item itemvalue="Python.threeDCalculate" />
+        <item itemvalue="Python.tmpTest_forCUDA" />
+        <item itemvalue="Python tests.pytest in tmpTest_forCUDA.py" />
+        <item itemvalue="Python.Ratio" />
       </list>
     </recent_temporary>
   </component>
@@ -242,7 +230,7 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="261" key="GridCell.Tab.-1.right/0.0.1536.824@0.0.1536.824" timestamp="1601010616943" />
-    <state width="1515" height="191" key="GridCell.Tab.0.bottom" timestamp="1605341962481">
+    <state width="1515" height="252" key="GridCell.Tab.0.bottom" timestamp="1605429265081">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -250,8 +238,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.bottom/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707386" />
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="191" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605341962481" />
-    <state width="1515" height="191" key="GridCell.Tab.0.center" timestamp="1605341962481">
+    <state width="1515" height="252" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605429265081" />
+    <state width="1515" height="252" key="GridCell.Tab.0.center" timestamp="1605429265080">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.center/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -259,8 +247,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.center/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.center/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.center/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="191" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605341962481" />
-    <state width="1515" height="191" key="GridCell.Tab.0.left" timestamp="1605341962481">
+    <state width="1515" height="252" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605429265080" />
+    <state width="1515" height="252" key="GridCell.Tab.0.left" timestamp="1605429265080">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.left/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715266" />
@@ -268,8 +256,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.left/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.left/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.left/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="191" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605341962481" />
-    <state width="1515" height="191" key="GridCell.Tab.0.right" timestamp="1605341962481">
+    <state width="1515" height="252" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605429265080" />
+    <state width="1515" height="252" key="GridCell.Tab.0.right" timestamp="1605429265081">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.right/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -277,39 +265,39 @@
     <state width="2027" height="304" key="GridCell.Tab.0.right/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.right/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.right/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="191" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605341962481" />
-    <state width="745" height="252" key="GridCell.Tab.1.bottom" timestamp="1605330057117">
+    <state width="1515" height="252" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605429265081" />
+    <state width="1515" height="252" key="GridCell.Tab.1.bottom" timestamp="1605429265084">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.bottom/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.bottom/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544214" />
     <state width="936" height="342" key="GridCell.Tab.1.bottom/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.bottom/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="745" height="252" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605330057117" />
-    <state width="745" height="252" key="GridCell.Tab.1.center" timestamp="1605330057117">
+    <state width="1515" height="252" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605429265084" />
+    <state width="1515" height="252" key="GridCell.Tab.1.center" timestamp="1605429265082">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.center/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.center/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544213" />
     <state width="936" height="342" key="GridCell.Tab.1.center/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.center/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="745" height="252" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1605330057117" />
-    <state width="745" height="252" key="GridCell.Tab.1.left" timestamp="1605330057117">
+    <state width="1515" height="252" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1605429265082" />
+    <state width="1515" height="252" key="GridCell.Tab.1.left" timestamp="1605429265082">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.left/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.left/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544213" />
     <state width="936" height="342" key="GridCell.Tab.1.left/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.left/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="745" height="252" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1605330057117" />
-    <state width="745" height="252" key="GridCell.Tab.1.right" timestamp="1605330057117">
+    <state width="1515" height="252" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1605429265082" />
+    <state width="1515" height="252" key="GridCell.Tab.1.right" timestamp="1605429265084">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.right/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.right/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544214" />
     <state width="936" height="342" key="GridCell.Tab.1.right/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.right/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="745" height="252" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1605330057117" />
+    <state width="1515" height="252" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1605429265084" />
     <state width="1515" height="261" key="GridCell.Tab.2.bottom" timestamp="1601010613371">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -341,10 +329,10 @@
     <state x="953" y="-1080" width="974" height="1047" key="dock-window-1/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605167258046" />
     <state x="2130" y="82" width="1526" height="740" key="dock-window-1/0.0.1536.824/1920.0.1920.1040@0.0.1536.824" timestamp="1605149900397" />
     <state x="-160" y="19" width="1526" height="740" key="dock-window-1/0.0.1536.824@0.0.1536.824" timestamp="1605181719100" />
-    <state x="440" y="23" width="781" height="821" key="dock-window-2" timestamp="1605343768295">
+    <state x="440" y="23" width="781" height="821" maximized="true" key="dock-window-2" timestamp="1605347561975">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="440" y="23" width="781" height="821" key="dock-window-2/0.0.1536.824@0.0.1536.824" timestamp="1605343768295" />
+    <state x="440" y="23" width="781" height="821" maximized="true" key="dock-window-2/0.0.1536.824@0.0.1536.824" timestamp="1605347561975" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1605252064227">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -365,7 +353,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Ratio.py</url>
-          <line>220</line>
+          <line>224</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

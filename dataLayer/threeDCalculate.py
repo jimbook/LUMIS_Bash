@@ -76,8 +76,6 @@ def meanScale_event(event: pd.DataFrame,mean_scale: pd.DataFrame):
     event.iloc[:,:32].mul(mean_scale.iloc[:,:32])
     return event
 
-
-
 if __name__ == '__main__':
     import time
     d = pd.read_csv("../tmpStorage/channelReplace.csv")

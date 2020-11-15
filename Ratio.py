@@ -40,16 +40,20 @@ class Ratio(object):
         poca_x, poca_y, poca_z, theta ( angle), p1_x, p1_y, p1_z, p2_x, p2_y, p2_z
     """
 
-    def __init__(self, poca_data, **kwargs):
+    def __init__(self, poca_data :np.array, **kwargs):
+        '''
 
-        self.theta_cut = 0.9
-        self.amplification = 30000
-        self.cube_size = 5
-        self.start_num = 0
-        self.slice_point = 1
-        random.seed(time.time())
+        :param poca_data: shape(None,10)[poca_x, poca_y, poca_z, theta ( angle), p1_x, p1_y, p1_z, p2_x, p2_y, p2_z]
+        :param kwargs:
+        '''
+        self.theta_cut = 0.9 # 大于这个的就扔掉
+        self.amplification = 30000 # 循环次数
+        self.cube_size = 5 # 探测区域的大小
+        self.start_num = 0 # 开始点
+        self.slice_point = 1 # 切分系数（切成几分）
+        random.seed(time.time()) #
         self.data = poca_data
-        self.RatioList = []
+        self.RatioList = [] # 保存返回ratio点的仓库
 
         ## set a save path
         filename = sys.argv[0]
@@ -97,10 +101,10 @@ class Ratio(object):
             self.poca_enhance(P_rand)
 
     def poca_enhance(self, P_rand):
-        N_all = 0
-        Cut_N = 0
-        Angle_sigma = 0
-        endpoints = self.start_num + int(self.data.shape[0] / self.slice_point)
+        N_all = 0 # 分母（总共的事件数据）
+        Cut_N = 0 #
+        Angle_sigma = 0 # 散射角的平方
+        endpoints = self.start_num + int(self.data.shape[0] / self.slice_point) # 结束点位置
         _temp = self.cube_size / 2
         for _i in range(self.start_num, endpoints):
             cpa = np.array([self.data[_i, 0], self.data[_i, 1], self.data[_i, 2]])  # the poca point
@@ -109,30 +113,30 @@ class Ratio(object):
             q0 = np.array([self.data[_i, 7], self.data[_i, 8], self.data[_i, 9]])  # the outgoing point
             # if Angle > 20:
             #     continue
-            diff = cpa - P_rand
-            if abs(diff[0]) < _temp and abs(diff[1]) < _temp and abs(diff[2]) < _temp:
-                N_all += 1
-                Angle = Angle * abs(1. - np.linalg.norm(diff) * 2. / self.cube_size / math.sqrt(3))
-                Angle_sigma += Angle_sigma + Angle ** 2
+            diff = cpa - P_rand # poca到生成点的矢量
+            if abs(diff[0]) < _temp and abs(diff[1]) < _temp and abs(diff[2]) < _temp: # 生成点的探测区域内是否包含poca
+                N_all += 1 #
+                Angle = Angle * abs(1. - np.linalg.norm(diff) * 2. / self.cube_size / math.sqrt(3)) # 平滑处理
+                Angle_sigma += Angle ** 2 # 角度平方的累加
                 if Angle <= self.theta_cut:
                     Cut_N += 1
             else:
-                if diff[2] < 0:
-                    line_u = cpa - p0
+                if diff[2] < 0: # poca在探测区域上
+                    line_u = cpa - p0 # 连线矢量
                     x_top = line_u[0] / line_u[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[0] - P_rand[0]
                     x_low = line_u[0] / line_u[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[0] - P_rand[0]
-                    y_top = line_u[1] / line_u[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[0]
-                    y_low = line_u[1] / line_u[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[0]
-                    if x_top < _temp and x_low < _temp and y_top < _temp and y_low < _temp:
+                    y_top = line_u[1] / line_u[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[1]
+                    y_low = line_u[1] / line_u[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[1]
+                    if x_top < _temp and x_low < _temp and y_top < _temp and y_low < _temp: # 连线是否过探测区
                         N_all += 1
                         Cut_N += 1
-                else:
+                else:# poca在探测区域下
                     line_d = q0 - cpa
                     x_top = line_d[0] / line_d[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[0] - P_rand[0]
                     x_low = line_d[0] / line_d[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[0] - P_rand[0]
-                    y_top = line_d[1] / line_d[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[0]
-                    y_low = line_d[1] / line_d[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[0]
-                    if x_top < _temp and x_low < _temp and y_top < _temp and y_low < _temp:
+                    y_top = line_d[1] / line_d[2] * (P_rand[2] + self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[1]
+                    y_low = line_d[1] / line_d[2] * (P_rand[2] - self.cube_size / 2 - cpa[2]) + cpa[1] - P_rand[1]
+                    if x_top < _temp and x_low < _temp and y_top < _temp and y_low < _temp: # 连线是否过探测区
                         N_all += 1
                         Cut_N += 1
         if N_all > int(100 * self.cube_size ** 2 * 0.01 / self.slice_point):  # check statistical validation

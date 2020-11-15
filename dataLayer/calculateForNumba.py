@@ -61,7 +61,7 @@ def timeCount(function):
 
 #将数据处理成可以加速处理的数据格式
 @timeCount
-def pretreatment_forNumba(rawData: pd.DataFrame):
+def pretreatment(rawData: pd.DataFrame,replaceInfo:np.array = channelReplace.values):
     '''
     将数据处理成可以加速处理的数据格式
     1.筛选数据-留下只有八层的数据
@@ -73,7 +73,7 @@ def pretreatment_forNumba(rawData: pd.DataFrame):
     firstData = rawData.set_index(dataLayer._Index[-2])
     result = []
     triggerID = np.unique(firstData.index.values)
-    replaceInfo = channelReplace.values
+
     ic = idxCount(triggerID.shape[0])
     for i in triggerID:
         ic.printNowCount()
@@ -100,6 +100,30 @@ def replaceBadChannel_forNUmba(rawData: np.array, replaceInfo: np.array):
         boardChoose = board == boardID
         rawData[boardChoose,oldChn] = rawData[boardChoose,newChn]
     return rawData
+
+
+#将数据处理成可以加速处理的数据格式-更快
+@timeCount
+def pretreatment_forNumba(rawData: pd.DataFrame,replaceInfo:np.array = channelReplace.values):
+    '''
+    将数据处理成可以加速处理的数据格式-更快
+    1.筛选数据-留下只有八层的数据
+    2.替换坏道
+    3.将数据转换成(None,8,32)[chn_00~chn_31]
+    :param rawData:
+    :return:(None,8,32)[chn_00~chn_31]
+    '''
+    # 筛选数据-留下只有八层的数据
+    boardCount = rawData.loc[:,dataLayer._Index[-2:]].groupby(dataLayer._Index[-2]).count()
+    boardCount_filer = boardCount.index.values[boardCount.iloc[:,0].values == 8]
+    first = rawData.set_index(dataLayer._Index[-2]).loc[boardCount_filer,dataLayer._Index[:36]].values
+    first = first.reshape((int(first.shape[0]/8),8,-1))
+    # first 为筛选后的数据，np.array - shape(None,8,36) column:chn_00~chn_35
+    # 替换坏道
+    for boardID,oldChn,newChn in replaceInfo:
+        first[:,boardID,oldChn] = first[:,boardID,newChn]
+    # 将数据转换成(None,8,32)[chn_00~chn_31]
+    return first[:,:,:32]
 
 # 用平均值法均一化、卡阈值、减去基线（同时低于基线的置零）-可加速
 @timeCount
