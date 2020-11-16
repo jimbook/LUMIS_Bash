@@ -12,5 +12,8 @@ if __name__ == '__main__':
     triggerSite = fastCalculateTriggerPositions_forNumba(cData,geo.values,dParameter.values[0])
     pos = fastCalculateParticleTrack(triggerSite,geo.values,dParameter.values[0])
     poca = calculatePocaPostions_forNumba(pos)
-    print(poca)
+    start = time.time()
+    points_ratio = ratio_main(poca,pd.read_csv("./tmpStorage/detectPlace.csv",header=0,index_col=0).values)
+    print("poca event:{},ratio running time:{}s".format(poca.shape[0],time.time()-start))
+    print(points_ratio.shape)
 

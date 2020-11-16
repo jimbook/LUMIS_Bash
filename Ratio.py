@@ -224,7 +224,6 @@ if __name__ == '__main__':
         analysis.run_poca(_df)
     data = np.concatenate(analysis.CPA_List, axis=0).reshape([len(analysis.CPA_List), 10])
     np.savetxt(os.path.join(analysis.res_path, 'poca.csv'), data, delimiter=",")
-
     ratio_test = Ratio(data)
     ratio_test.generate_ratio_points(start_num=1000, slice=2, amplification=10000)
     print()

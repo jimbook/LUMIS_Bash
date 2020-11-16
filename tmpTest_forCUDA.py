@@ -1,5 +1,6 @@
 from numba import cuda
 import numpy as np
+import numba
 import math
 from time import time
 
@@ -8,6 +9,14 @@ def gpu_add(a, b, result, n):
     idx = cuda.threadIdx.x + cuda.blockDim.x * cuda.blockIdx.x
     if idx < n :
         result[idx] = a[idx] + b[idx]
+
+@cuda.jit
+def gpu_copy(rawData, output,n):
+    l = cuda.shared.array((32,32),numba.float32)
+    idx = cuda.threadIdx.x + cuda.blockDim.x * cuda.blockIdx.x
+    if idx < n:
+        for i in range(3):
+            output[idx,i] = rawData[idx,i] + n
 
 def main():
     n = 50000000
@@ -37,4 +46,20 @@ def main():
         print("result correct!")
 
 if __name__ == "__main__":
-    main()
+    n = np.arange(3)
+    print(np.linalg.norm(n))
+    print(np.sqrt(np.sum(n**2)))
+    n = np.arange(6).reshape((3,2))
+    print(n)
+    print(n.reshape((-1,)))
+
+    n = 5000
+    rawData = np.arange(n*3).astype(np.int32).reshape((-1,3))
+    r = cuda.to_device(rawData)
+    out = cuda.device_array(rawData.shape)
+    cuda.synchronize()
+    threads_per_block = 32
+    blocks_per_grid = math.ceil(n / threads_per_block)
+    gpu_copy[blocks_per_grid, threads_per_block](r,out,n)
+    output = out.copy_to_host()
+    print(output[:10])
