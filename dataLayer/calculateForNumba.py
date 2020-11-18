@@ -125,6 +125,19 @@ def pretreatment_forNumba(rawData: pd.DataFrame,replaceInfo:np.array = channelRe
     # 将数据转换成(None,8,32)[chn_00~chn_31]
     return first[:,:,:32]
 
+@timeCount
+def getParameter(rawData):
+    baseline = np.empty((8,36))
+    threshold = np.empty((8, 36))
+    for i in range(8):
+        board = rawData.loc[rawData[dataLayer._Index[-1]] == i]
+        for j in range(36):
+            hist,_ = np.histogram(board.iloc[:,j].values,bins=np.arange(300,1000))
+            tmp = np.argmax(hist)
+            baseline[i,j] = tmp + 300
+            threshold[i,j] = np.argmin(hist[tmp:tmp + 30])+baseline[i,j]
+    return baseline,threshold
+
 # 用平均值法均一化、卡阈值、减去基线（同时低于基线的置零）-可加速
 @timeCount
 def meanScale_forNumba(event: np.array,mean_scale: np.array,threshold: np.array,baseline: np.array):
@@ -138,9 +151,11 @@ def meanScale_forNumba(event: np.array,mean_scale: np.array,threshold: np.array,
     :param baseline: (8,32)
     :return:(None,8,32)
     '''
-    first = event * mean_scale
-    np.place(first,first < threshold,0)
-    second = first - baseline
+    first = event# * mean_scale
+    t = threshold*mean_scale
+    np.place(first,first < threshold*mean_scale,0)
+    b= baseline*mean_scale
+    second = first - baseline*mean_scale
     np.place(second,second < 0,0)
     return second
 
@@ -181,20 +196,32 @@ def fastCalculateTriggerPositions_forNumba(event: np.array,geometry: np.array, d
     :param event: (None,8,4)-[max,min,maxIndex,minIndex]
     :param geometry: (8,7)-[vertexVector_x,vertexVector_y,vertexVector_z,normalVector_x,normalVector_y,normalVector_z,sitMode]
     :param detectorSize:(4,)-[length,width,barInterval,barHeight]
-    :return:(None,8,3)[x,y,z]
+    :return:(None,8,2)[x or y,z]
     '''
-    output = np.full((event.shape[0], 8, 3),np.nan)
+    layer_distance_np = np.array([0, 25.36 + 10.64, 405, 405 + 25.36 + 10.64,
+                                  1010, 1010 + 25.36 + 10.64, 1415, 1415 + 25.36 + 10.64]).T
+    output = np.full((event.shape[0], 8, 3), np.nan)
     xMode = geometry[:, 6] == 0
     yMode = geometry[:, 6] == 1
     barSite = event[:, :, 2] - event[:, :, 3]
-    EnergeRate = event[:, :, 0]/(event[:, :, 0] + event[:, :, 1]) * detectorSize[2]/2
+    EnergeRate = event[:, :, 0] / (event[:, :, 0] + event[:, :, 1]) * detectorSize[2] / 2
+
+    #
+    set_bar =  event[:, xMode, 2] * detectorSize[2] / 2
+    en_offset = EnergeRate[:, xMode] * (barSite[:, xMode])
+    odd_offset = detectorSize[2] * (-barSite[:, xMode] + 1) / 2
+    geo_offset = geometry[xMode, 0]
+    all = set_bar + en_offset + odd_offset + geo_offset
     # 计算x取向的数据
-    output[:, xMode, 0] = event[:, xMode, 2] * detectorSize[2]/2 + EnergeRate[:, xMode] * (barSite[:, xMode]) + detectorSize[2] * (-barSite[:, xMode] + 1) / 2 + geometry[xMode, 0]
+    output[:, xMode, 0] = event[:, xMode, 2] * detectorSize[2] / 2 + EnergeRate[:, xMode] * (barSite[:, xMode]) + \
+                          detectorSize[2] * (-barSite[:, xMode] + 1) / 2 + geometry[xMode, 0]
     # 计算y取向的数据
-    output[:, yMode, 1] = event[:, yMode, 2] * detectorSize[2]/2 + EnergeRate[:, yMode] * (barSite[:, yMode]) + detectorSize[2] * (-barSite[:, yMode] + 1) / 2 + geometry[yMode, 1]
+    output[:, yMode, 1] = event[:, yMode, 2] * detectorSize[2] / 2 + EnergeRate[:, yMode] * (barSite[:, yMode]) + \
+                          detectorSize[2] * (-barSite[:, yMode] + 1) / 2 + geometry[yMode, 1]
     # 计算z方向上的数据
     output[:, :, 2] = event[:, :, 2] % 2 * detectorSize[3] + (-1) ** event[:, :, 2] * EnergeRate + geometry[:, 2]
     return output
+
 
 # 快速反演粒子径迹（仅用于xy正交放置时）
 @timeCount
@@ -205,12 +232,12 @@ def fastCalculateParticleTrack(event: np.array,geometry: np.array, detectorSize:
     :param geometry: (8,7)-[vertexVector_x,vertexVector_y,vertexVector_z,normalVector_x,normalVector_y,normalVector_z,sitMode]
     :param detectorSize:(4,)-[length,width,barInterval,barHeight]
     :param wanted_z:(4,)
-    :return:(None,4,3)[x,y,z]
+    :return:(None,4,2)[x or y,z]
     '''
     xBoard = [0,2,4,6]
     yBoard = [1,3,5,7]
     if wanted_z is None:
-        wanted_z = geometry[::2,-1] + detectorSize[-1] # shape(4,)
+        wanted_z = geometry[::2,2] + detectorSize[-1] # shape(4,)
     output = np.empty((event.shape[0],4,3))
     # 注意这里以z轴为X，x轴/y轴为Y进行拟合，以兼容垂直入射的情况
     slop_x,intercept_x = getLineFrom2Pos(event[:,xBoard[::2],2],event[:,xBoard[::2],0],
@@ -218,8 +245,8 @@ def fastCalculateParticleTrack(event: np.array,geometry: np.array, detectorSize:
     slop_y,intercept_y = getLineFrom2Pos(event[:,yBoard[::2],2],event[:,yBoard[::2],1],
                                          event[:,yBoard[1::2],2],event[:,yBoard[1::2],1])
     for i in range(wanted_z.shape[0]):
-        output[:, i, 0] = wanted_z[i]*slop_x[:,i%2] - intercept_x[:,i%2]
-        output[:, i, 1] = wanted_z[i]*slop_y[:,i%2] - intercept_y[:,i%2]
+        output[:, i, 0] = wanted_z[i]*slop_x[:,int(i/2)] + intercept_x[:,int(i/2)]
+        output[:, i, 1] = wanted_z[i]*slop_y[:,int(i/2)] + intercept_y[:,int(i/2)]
         output[:, i, 2] = wanted_z[i]
     return output
 
@@ -238,56 +265,50 @@ def calculatePocaPostions_forNumba(event: np.array):
     '''
     output = np.empty((event.shape[0],10))
     for i in range(event.shape[0]):
-        poca,theta = calculateOnePocaPostion(event[i])
+        poca,theta = calculateOnePocaPosition(event[i])
         output[i, :3] = poca
         output[i, 3] = theta
         output[i, 4:7] = event[i, 1]
         output[i, 7:] = event[i, 2]
     return output
 
-def calculateOnePocaPostion(event: np.array):
-    '''
+def calculateOnePocaPosition(event: np.array):
+    """
     计算一个事件中的poca点
     :param event: (4,3)[x,y,z]
     :return:
-    '''
-    inVector = (event[1] - event[0]) / np.linalg.norm(event[1] - event[0])
-    outVector = (event[3] - event[2]) / np.linalg.norm(event[3] - event[2])
+    """
+    # 计算入射，出射基本信息
+    inVector = (event[1] - event[0])
+    outVector = (event[3] - event[2])
+    longSide = event[2] - event[0]
+    in_out = np.dot(inVector, outVector)
+    in_in = np.dot(inVector, inVector)
+    out_out = np.dot(outVector, outVector)
+    in_long = np.dot(longSide, inVector)
+    out_long = np.dot(longSide, outVector)
     # 计算夹角
-    cosTheta = np.dot(inVector,outVector)/(np.linalg.norm(inVector) * np.linalg.norm(outVector))
-    if  cosTheta >= 1:# 由于计算机精度问题，cosTheta可能大于1
-        sinTheta = 0
-    else:
-        sinTheta = np.sqrt(1-cosTheta**2)
-    theta = np.arcsin(sinTheta) * 180 / np.pi # 单位：°
+    # 单位：°
+    theta = math.acos(np.sqrt((in_out * in_out) / (in_in * out_out))) * 180 / np.pi
     # 计算poca点
-    longSide = event[0] - event[2]
-    in_in = np.dot(inVector,inVector)
-    in_out = np.dot(inVector,outVector)
-    out_out = np.dot(outVector,outVector)
-    in_long = np.dot(inVector,longSide)
-    out_long = np.dot(outVector,longSide)
-    D = in_in*out_out - in_out**2
-    if D < 1e-4:
-        sc = 0
-        tc = (in_out / out_out) if in_out > out_out else (out_long / out_out)
+    if in_in < 1e-4:
+        t1 = in_long / in_in
+        t2 = - out_long / out_out
     else:
-        sc = (in_out * out_long - out_out * in_long) / D
-        tc = (in_in * out_long - in_out * in_long) / D
-    dP = longSide + (inVector * sc) - (outVector * tc)
-    poca = event[0] + (inVector * sc) - (dP * sc)
-    return poca,theta
+        t1 = (in_out * out_long - out_out * in_long) / (in_out ** 2 - in_in * out_out)
+        t2 = in_in / in_out * t1 - (in_long / in_out)
+    return ((event[0] + t1 * inVector) + (event[2] + t2 * outVector)) / 2, theta
 
 
 # 比率算法算法
-def ratio_main(event:np.array,detectPlace: np.array,amplification: int = 16*5000,**kwargs):
+def ratio_main(event:np.array,detectPlace: np.array,amplification: int = 32*1024,**kwargs):
     '''
     通过比率算法扩展poca点
     :param event: 原始数据(None,10)[poca_x,poca_y,poca_z,theta,p1_x, p1_y, p1_z, p2_x, p2_y, p2_z]
     :param detectPlace: (3,2)[x,y,z]-[min,max)
     :param amplification: 扩展次数
     :param kwargs:theta_cut-角度阈值;device_GPU-是否使用GPU计算;cube_size-探测区域的大小
-    :return:
+    :return:(None,6)[MSR_x, MSR_y, MSR_z, MSC, ratio,available]
     '''
     theta_cut = kwargs.get("theta_cut",0.9)
     device_GPU = kwargs.get("device_GPU",True)# todo: 检测GUP是否就绪，未就绪则改为CPU计算

@@ -46,20 +46,30 @@ def main():
         print("result correct!")
 
 if __name__ == "__main__":
-    n = np.arange(3)
-    print(np.linalg.norm(n))
-    print(np.sqrt(np.sum(n**2)))
-    n = np.arange(6).reshape((3,2))
-    print(n)
-    print(n.reshape((-1,)))
+    _shift = np.array([-2.02264937, -0.789919915, 1.223523393, 1.296914005,
+                       0.556464601, -0.417131352, 0.242661376, -0.089862738])
+    result = np.empty(8)
+    result[::2] = _shift[::2] + 71.56
+    result[1::2] = _shift[1::2] + 71.24
+    print(result)
 
-    n = 5000
-    rawData = np.arange(n*3).astype(np.int32).reshape((-1,3))
-    r = cuda.to_device(rawData)
-    out = cuda.device_array(rawData.shape)
-    cuda.synchronize()
-    threads_per_block = 32
-    blocks_per_grid = math.ceil(n / threads_per_block)
-    gpu_copy[blocks_per_grid, threads_per_block](r,out,n)
-    output = out.copy_to_host()
-    print(output[:10])
+
+
+
+    # n = np.arange(3)
+    # print(np.linalg.norm(n))
+    # print(np.sqrt(np.sum(n**2)))
+    # n = np.arange(6).reshape((3,2))
+    # print(n)
+    # print(n.reshape((-1,)))
+    #
+    # n = 5000
+    # rawData = np.arange(n*3).astype(np.int32).reshape((-1,3))
+    # r = cuda.to_device(rawData)
+    # out = cuda.device_array(rawData.shape)
+    # cuda.synchronize()
+    # threads_per_block = 32
+    # blocks_per_grid = math.ceil(n / threads_per_block)
+    # gpu_copy[blocks_per_grid, threads_per_block](r,out,n)
+    # output = out.copy_to_host()
+    # print(output[:10])

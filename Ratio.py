@@ -216,7 +216,7 @@ class Ratio(object):
 from tqdm import trange
 
 if __name__ == '__main__':
-    from poca import POCA_Analysis
+    from _poca import POCA_Analysis
     analysis = POCA_Analysis()
     data = pd.read_csv('tmpStorage/poca_data2.csv', index_col=0)
     for i in trange(data.shape[0]):

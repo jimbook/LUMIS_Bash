@@ -35,9 +35,9 @@ for i in range(3,53):
     z *= 0.5
     d *= 2.0
 
-sp1 = gl.GLScatterPlotItem(pos=pos, size=size, color=color, pxMode=False)
-sp1.translate(5,5,0)
-w.addItem(sp1)
+# sp1 = gl.GLScatterPlotItem(pos=pos, size=size, color=color, pxMode=False)
+# sp1.translate(5,5,0)
+# w.addItem(sp1)
 
 #
 pos = np.random.random((10000,3))
@@ -46,10 +46,11 @@ pos[0] = (0,0,0)
 color = np.ones((pos.shape[0],4))
 d2 = (pos**2).sum(axis=1)**0.5
 size = np.random.random(size=pos.shape[0])*10
+
 sp2 = gl.GLScatterPlotItem(pos=pos,color=(1,1,1,0.1), size=size)
 w.addItem(sp2)
-side00 = gl.GLLinePlotItem(pos=np.array([[10,0,0],[10,0,10]]),color=(1,1,1,0.3),width=1)
-w.addItem(side00)
+# side00 = gl.GLLinePlotItem(pos=np.array([[10,0,0],[10,0,10]]),color=(1,1,1,0.3),width=1)
+# w.addItem(side00)
 
 
 if __name__ == '__main__':
