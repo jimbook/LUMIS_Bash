@@ -20,29 +20,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2327fb3-c01f-48b6-bf83-d0901e10a5a3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dataLayer/auxiliaryFunction.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/baseline_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/channelReplace_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/detectorGeometrySize_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/geometryCoordinateSystem_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/meanScale_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/parameterStorage/threshold_default.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dataLayer/ratioFunction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataLayer/calculateForNumba.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataLayer/calculateForPoca.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/19_31/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/19_33/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/20_40/data.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/20_52/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/21_15/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-17/23_12/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-18/12_47/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-18/12_52/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-18/13_3/plts/poca.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/res/2020-11-18/13_39/plts/poca.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/UIsource/GL3D.ui" beforeDir="false" afterPath="$PROJECT_DIR$/UI/UIsource/GL3D.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_poca.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/configurationFile/333.lmbc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/configurationFile/conf.lmbc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/configurationFile/config2020_9_5.lmbc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/configurationFile/ll.lmbc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playBack.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/2020-11-18/16_54/plts/poca.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmpStorage/shift.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/threeD.py" beforeDir="false" afterPath="$PROJECT_DIR$/threeD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/bl.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/channelReplace.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/detectPlace.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/detectorGeometryParameter.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/geometrySystem.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/mean_scale.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/poca_data2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpStorage/tr.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpTest_forCUDA.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,25 +64,26 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/parameterStorage" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\parameterStorage" />
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash" />
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData" />
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\tmpStorage" />
-      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\h5Data" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\temporary" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\dataLayer" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\tmpStorage" />
       <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\csvData" />
     </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash" />
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\h5Data" />
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\parameterStorage" />
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\testData" />
+      <recent name="C:\Users\jimbook\Desktop\LUMIS_Bash\tmpStorage" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.threeD">
     <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -107,27 +105,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="calculateForPoca" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="LUMIS_Bash" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataLayer" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\jimbook\Desktop\LUMIS_Bash\dataLayer\calculateForPoca.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="poca" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -140,7 +117,28 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/poca.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\jimbook\Desktop\LUMIS_Bash\testData\temporary\poca.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tempTest_trackPlot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="LUMIS_Bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tempTest_trackPlot.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -170,7 +168,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="tmpTest_forCUDA" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="threeD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="LUMIS_Bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -182,7 +180,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tmpTest_forCUDA.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/threeD.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -193,11 +191,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.threeD" />
         <item itemvalue="Python.test" />
+        <item itemvalue="Python.tempTest_trackPlot" />
         <item itemvalue="Python.__init__" />
         <item itemvalue="Python.poca" />
-        <item itemvalue="Python.calculateForPoca" />
-        <item itemvalue="Python.tmpTest_forCUDA" />
       </list>
     </recent_temporary>
   </component>
@@ -259,7 +257,7 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="261" key="GridCell.Tab.-1.right/0.0.1536.824@0.0.1536.824" timestamp="1601010616943" />
-    <state width="1515" height="163" key="GridCell.Tab.0.bottom" timestamp="1605690312814">
+    <state width="1515" height="154" key="GridCell.Tab.0.bottom" timestamp="1605849378716">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -267,8 +265,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.bottom/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707386" />
     <state width="2027" height="304" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="163" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605690312814" />
-    <state width="1515" height="163" key="GridCell.Tab.0.center" timestamp="1605690312814">
+    <state width="1515" height="154" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605849378716" />
+    <state width="1515" height="154" key="GridCell.Tab.0.center" timestamp="1605849378716">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.center/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -276,8 +274,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.center/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.center/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.center/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="163" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605690312814" />
-    <state width="1515" height="163" key="GridCell.Tab.0.left" timestamp="1605690312814">
+    <state width="1515" height="154" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605849378716" />
+    <state width="1515" height="154" key="GridCell.Tab.0.left" timestamp="1605849378716">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.left/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715266" />
@@ -285,8 +283,8 @@
     <state width="2027" height="304" key="GridCell.Tab.0.left/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.left/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.left/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="163" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605690312814" />
-    <state width="1515" height="163" key="GridCell.Tab.0.right" timestamp="1605690312814">
+    <state width="1515" height="154" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605849378716" />
+    <state width="1515" height="154" key="GridCell.Tab.0.right" timestamp="1605849378716">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="304" key="GridCell.Tab.0.right/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601782715267" />
@@ -294,39 +292,39 @@
     <state width="2027" height="304" key="GridCell.Tab.0.right/-684.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601797387173" />
     <state width="936" height="190" key="GridCell.Tab.0.right/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605166707385" />
     <state width="2027" height="304" key="GridCell.Tab.0.right/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601711229480" />
-    <state width="1515" height="163" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605690312814" />
-    <state width="1515" height="275" key="GridCell.Tab.1.bottom" timestamp="1605689689974">
+    <state width="1515" height="154" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605849378716" />
+    <state width="1515" height="275" key="GridCell.Tab.1.bottom" timestamp="1605792079062">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.bottom/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.bottom/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544214" />
     <state width="936" height="342" key="GridCell.Tab.1.bottom/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.bottom/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="1515" height="275" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605689689974" />
-    <state width="1515" height="275" key="GridCell.Tab.1.center" timestamp="1605689689974">
+    <state width="1515" height="275" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605792079062" />
+    <state width="1515" height="275" key="GridCell.Tab.1.center" timestamp="1605792079062">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.center/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.center/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544213" />
     <state width="936" height="342" key="GridCell.Tab.1.center/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.center/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="1515" height="275" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1605689689974" />
-    <state width="1515" height="275" key="GridCell.Tab.1.left" timestamp="1605689689974">
+    <state width="1515" height="275" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1605792079062" />
+    <state width="1515" height="275" key="GridCell.Tab.1.left" timestamp="1605792079062">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.left/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.left/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544213" />
     <state width="936" height="342" key="GridCell.Tab.1.left/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.left/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="1515" height="275" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1605689689974" />
-    <state width="1515" height="275" key="GridCell.Tab.1.right" timestamp="1605689689974">
+    <state width="1515" height="275" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1605792079062" />
+    <state width="1515" height="275" key="GridCell.Tab.1.right" timestamp="1605792079062">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="2027" height="374" key="GridCell.Tab.1.right/-1920.0.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601781502937" />
     <state width="2027" height="373" key="GridCell.Tab.1.right/-413.1440.1536.824/0.0.2048.1112@0.0.2048.1112" timestamp="1601994544214" />
     <state width="936" height="342" key="GridCell.Tab.1.right/0.0.1536.824/0.-1080.1920.1040@0.-1080.1920.1040" timestamp="1605158652148" />
     <state width="2027" height="374" key="GridCell.Tab.1.right/0.0.1536.824/1920.0.2048.1112@1920.0.2048.1112" timestamp="1601710918501" />
-    <state width="1515" height="275" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1605689689974" />
+    <state width="1515" height="275" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1605792079062" />
     <state width="1515" height="261" key="GridCell.Tab.2.bottom" timestamp="1601010613371">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -390,19 +388,9 @@
           <option name="timeStamp" value="87" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/_poca.py</url>
-          <line>559</line>
-          <option name="timeStamp" value="99" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/poca.py</url>
+          <url>file://$PROJECT_DIR$/testData/temporary/poca.py</url>
           <line>497</line>
           <option name="timeStamp" value="124" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dataLayer/calculateForPoca.py</url>
-          <line>56</line>
-          <option name="timeStamp" value="126" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
