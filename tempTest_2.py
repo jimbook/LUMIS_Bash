@@ -3,6 +3,8 @@ from multiprocessing.connection import Connection
 import h5py
 import numpy as np
 import pandas as pd
+import dataLayer
+from dataLayer.baseCore import *
 
 
 def threadTask_0(s: Connection,name: str):
@@ -35,11 +37,33 @@ def task_1():
         print(df)
         time.sleep(1)
 print('temptest')
-import dataFactory
+
 
 if __name__ == '__main__':
-    d = {'l':1,'a':2}
-    print('l' in d)
+    data = h5Data("data/2020_11_26/tempData_10_27_36.h5",'r').getData(-2)
+    countBoard = data[dataLayer._Index[-2:]].groupby(dataLayer._Index[-2]).count()
+    vc = countBoard["boardID"].value_counts()
+    allCount = vc.sum()
+    #print(allCount)
+    print(vc)
+    print("相对：{}".format(allCount))
+    print(vc/allCount)
+    #print(vc)
+    #print(countBoard.index[countBoard["boardID"] == 1])
+    idx = countBoard.index[countBoard["boardID"] == 1].values
+    #print(idx)
+    nFull = data.set_index("triggerID").loc[idx]
+    _abcd = ["a","b","c","d","e","f","g","h"]
+    abcd = [str(x) for x in range(10)]
+    abcd.extend(_abcd)
+    #print(abcd)
+    head = ["{}{}".format(x,y) for x in abcd for y in range(10)]
+    #print("-".join(head))
+    # for i in data[dataLayer._Index[-2:]]:
+    #     event = data[dataLayer]
+    # triggerID = np.unique(data[dataLayer._Index[-2]].values)
+    # data_2 = data.set_index(dataLayer._Index[-2])
+    # print(data_2)
 
     # n = 0
     # while True:
@@ -48,4 +72,3 @@ if __name__ == '__main__':
     #     n += d.shape[0]
     #     print(d)
     #     time.sleep(1)
-

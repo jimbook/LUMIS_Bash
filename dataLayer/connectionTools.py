@@ -314,7 +314,7 @@ class Lumis_Decode(object):
             # 接收到的是空包
             elif check == 2:
                 self._empty += 1
-                triggerID = int.from_bytes(buff[2:4],byteorder='big',signed=False)
+                triggerID = int.from_bytes(buff[4:6],byteorder='big',signed=False)
                 # 如果接收到的是新事件
                 if self._temTID != triggerID:
                     # 更新状态信息

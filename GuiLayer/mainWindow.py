@@ -9,7 +9,7 @@ from pyqtgraph.dockarea import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow, subPlotWin_eventXYTrackShow
+from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow, subPlotWin_eventXYTrackShow,GL3DWidget
 from GuiLayer.myWidget import setConfigurationDailog_basic
 from dataLayer import _Index
 from dataLayer.connectionTools import linkGBT
@@ -67,6 +67,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_coincidence_addPlot.clicked.connect(self.plotCoincidenceEmergySpectrum_event)
         self.pushButton_triggerCondition_addPlot.clicked.connect(self.plotTriggerCondition_event)
         self.pushButton_XYTriggerCondition_addPlot.clicked.connect(self.plotXYTrtggerCondition_event)
+        self.pushButton_threeD_addPlot.clicked.connect(self.plot3D_event)
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
         # stop measurment
@@ -298,6 +299,13 @@ class window(QMainWindow,Ui_MainWindow):
         plot.dataUpdate()
         self.addPlot(plot)
 
+    #事件：显示3D成像
+    @pyqtSlot()
+    def plot3D_event(self):
+        plot = GL3DWidget()
+        self.updateSingal.connect(plot.dataUpdate)
+        self.addPlot(plot)
+
     # 菜单事件：设置配置参数
     @pyqtSlot()
     def action_configuration_event(self):
@@ -336,18 +344,15 @@ class window(QMainWindow,Ui_MainWindow):
         for i in range(h5.index.shape[0]):
             tmpData = h5.getData(i)
             k = 0
-            u,idx = np.unique(tmpData[_Index[-2]],True)
+            u,idx = np.unique(tmpData[_Index[-2]].values,True)
             while k + 300 < idx.shape[0]:
-                dataStorage.playBackAddData(tmpData[idx[k]:idx[k+300]].values)
+                dataStorage.playBackAddData(tmpData.loc[idx[k]:idx[k+300]].values)
                 self.updateSingal.emit(0)
                 k += 300
             dataStorage.playBackAddData(tmpData[idx[k]:].values)
             self.updateSingal.emit(0)
             dataStorage.playBackNewSet()
         dataStorage.EndPlayBackModule()
-
-
-
 
     #auxiliary: erver interval will call this function to refresh clock widget
     #辅助函数：每过一个时间间隔将会调用一次，来刷新时间显示控件显示的时间
@@ -359,6 +364,9 @@ class window(QMainWindow,Ui_MainWindow):
         _sec = _t % 60
         self.lcdNumber_s_ms.display("{:4.2f}".format(_sec))
         self.lcdNumber_h_m.display("{:0>d}:{:0>d}".format(_hour,_min))
+
+
+
 if __name__ == '__main__':
     import pyqtgraph.examples
     pyqtgraph.examples.run()

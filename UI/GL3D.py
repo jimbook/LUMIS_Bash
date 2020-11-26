@@ -90,7 +90,7 @@ class Ui_Form(object):
         self.verticalLayout_2.addWidget(self.label_3)
         self.doubleSpinBox_maxZ = QtWidgets.QDoubleSpinBox(self.groupBox_2)
         self.doubleSpinBox_maxZ.setMaximum(1500.0)
-        self.doubleSpinBox_maxZ.setProperty("value", 850.0)
+        self.doubleSpinBox_maxZ.setProperty("value", 900.0)
         self.doubleSpinBox_maxZ.setObjectName("doubleSpinBox_maxZ")
         self.verticalLayout_2.addWidget(self.doubleSpinBox_maxZ)
         self.label_4 = QtWidgets.QLabel(self.groupBox_2)

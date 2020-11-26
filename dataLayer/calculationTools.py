@@ -149,6 +149,17 @@ def translateTemperature(data: np.array) -> np.array:
 
 # 轨迹测试
 
+# 计算poca点
+from threeD import pocaAnalizy
+def PocaPosition(data: pd.DataFrame) -> np.array:
+    '''
+
+    :param data:
+    :return: shape = (None,4) [x,y,z,theta]
+    '''
+    a0 = pocaAnalizy(data)
+    return a0.pocaPositions[:, :4]
+
 if __name__ == '__main__':
     pass
 

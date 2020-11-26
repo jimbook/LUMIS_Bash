@@ -111,8 +111,6 @@ class GL3DWidget(QWidget,Ui_Form):
         ColorMap = self.widget_colorMap.colorMap().mapToFloat(data=tmp)
         self.scatterItem.setData(pos=pos,color = ColorMap,size=tmp*10)
 
-
-
 class leadBrick(gl.GLMeshItem):
     def __init__(self,modelName = 0,zoom = 30,color = (255,155,33,33)):
         verts = np.zeros((8, 3))

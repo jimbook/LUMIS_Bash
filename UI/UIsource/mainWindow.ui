@@ -546,7 +546,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>324</height>
+          <height>294</height>
          </rect>
         </property>
         <attribute name="label">
@@ -599,6 +599,33 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="groupBox_9">
+           <property name="title">
+            <string>3D成像</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_19">
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>3D图像：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_threeD_addPlot">
+                <property name="text">
+                 <string>添加图像</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -607,6 +634,45 @@
             <size>
              <width>20</width>
              <height>195</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_alarm">
+        <attribute name="label">
+         <string>警报功能</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_11">
+         <item>
+          <widget class="QGroupBox" name="groupBox_10">
+           <property name="title">
+            <string>报警设置</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="QCheckBox" name="checkBox_alarm_messageBox">
+              <property name="text">
+               <string>开启弹窗警告</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
             </size>
            </property>
           </spacer>
