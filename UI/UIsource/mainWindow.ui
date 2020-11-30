@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>1002</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -79,9 +79,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
-          <width>314</width>
-          <height>348</height>
+          <y>-4</y>
+          <width>293</width>
+          <height>335</height>
          </rect>
         </property>
         <attribute name="label">
@@ -283,7 +283,7 @@
           <x>0</x>
           <y>0</y>
           <width>279</width>
-          <height>451</height>
+          <height>440</height>
          </rect>
         </property>
         <attribute name="label">
@@ -546,7 +546,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>294</height>
+          <height>331</height>
          </rect>
         </property>
         <attribute name="label">
@@ -641,6 +641,14 @@
         </layout>
        </widget>
        <widget class="QWidget" name="page_alarm">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>300</width>
+          <height>331</height>
+         </rect>
+        </property>
         <attribute name="label">
          <string>警报功能</string>
         </attribute>
@@ -652,14 +660,25 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <widget class="QCheckBox" name="checkBox_alarm_messageBox">
-              <property name="text">
-               <string>开启弹窗警告</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_20">
+              <item>
+               <widget class="QCheckBox" name="checkBox_alarm_messageBox">
+                <property name="text">
+                 <string>开启弹窗警告</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_alarm_clear">
+                <property name="text">
+                 <string>重置</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

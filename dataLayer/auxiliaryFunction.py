@@ -1,5 +1,9 @@
 import time
 import datetime
+import pandas as pd
+import dataLayer
+from dataLayer.baseCore import h5Data
+import h5py
 
 __all__ = ["idxCount","timeCount"]
 # 辅助函数：打印loop
@@ -38,3 +42,25 @@ def timeCount(function):
         print("function:{},running time:{}".format(function.__name__,datetime.timedelta(seconds=cost_time)))
         return res
    return wrapper
+
+# 辅助函数：修正dataSet未正确划分的错误
+def getCorrectedIndex(data: pd.DataFrame):
+    index = data[dataLayer._Index[-2]]
+    index_0 = index[:-1].reset_index()
+    index_1 = index[1:].reset_index()
+    index_diff = index_0 - index_1
+    result = index_diff.loc[index_diff["triggerID"].values > 0].loc[:, "triggerID"]
+    return result.index.values + 1
+
+
+def correctDataSetSlice(h5Path: str):
+    data = h5Data(h5Path, 'r')
+    corrected = getCorrectedIndex(data.getData(-1))
+    print(corrected)
+    data.close()
+    file = h5py.File(h5Path, mode="r+")
+    dataGroup = file['dataGroup']
+    index = dataGroup['index']
+    index.resize(corrected.shape[0] + 1, axis=0)
+    index[1:] = corrected
+    file.close()

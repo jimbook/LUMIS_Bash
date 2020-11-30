@@ -3,7 +3,7 @@
 '''
 import numpy as np
 import pandas as pd
-import os
+import os,time
 from dataLayer import calculationTools
 from dataLayer import _Index
 from dataLayer.baseCore import h5Data
@@ -54,6 +54,14 @@ _EnergySpectrumData = np.zeros((8, 36, 4095)).astype('int64')
 # 基线数据
 _baseline = np.zeros((8, 36)).astype('int64')
 
+# poca点数据
+_pocaPos = np.empty((500,4))
+_pocaCount = 0
+
+# 检测高Z物体报警索引
+_alarmIndex = 0
+_alarmTime = time.time()
+
 #***************内部函数*****************
 
 # 新增数据:计算各道能谱，并merge能谱数据
@@ -61,6 +69,15 @@ def mergeEnergySpectrum(newData: pd.DataFrame):
     global _EnergySpectrumData
     newSpectrum = calculationTools.ToEnergySpectrumData(newData)
     _EnergySpectrumData[:newSpectrum.shape[0]] += newSpectrum
+
+# 新增数据：计算poca点
+def calculatePocaPosition(newData:pd.DataFrame):
+    global _pocaPos,_pocaCount
+    newPoca = calculationTools.PocaPosition(newData)
+    while _pocaCount+newPoca.shape[0] >= _pocaPos.shape[0]:
+        _pocaPos = np.append(_pocaPos, np.empty((500, 4))).reshape((-1, 4))
+    _pocaPos[_pocaCount:_pocaCount+newPoca.shape[0]] = newPoca[:,:4]
+    _pocaCount += newPoca.shape[0]
 
 #*******************外部函数********************
 
@@ -77,12 +94,13 @@ def setH5Path(h5Path: str):
     else:
         raise FileNotFoundError('{} can not found.'.format(h5Path))
 
-# 更新一次数据（当前只更新能谱数据）
+# 更新一次数据（当前只更新能谱数据、poca点数据）
 def update():
     global _dataIndex, _path
     h5 = h5Data(_path,'r')
     newData = h5.getData(-2, _dataIndex)
     mergeEnergySpectrum(newData)
+    calculatePocaPosition(newData)
     _dataIndex += newData.shape[0]
     print(getEnergySpetrumData(0,16),h5.getFileName(),h5.index[:])
 
@@ -112,13 +130,14 @@ def EndPlayBackModule():
     _playBackData = None
 
 #---------------clear--------------
-# 清空所有数据(暂时只清空索引记录、h5文件指向、能谱数据和基线数据)
+# 清空所有数据(暂时只清空索引记录、h5文件指向、能谱数据和基线数据,poca点和poca点索引)
 def clearAllData():
-    global _dataIndex, _path, _baseline, _EnergySpectrumData
+    global _dataIndex, _path, _baseline, _EnergySpectrumData,_pocaPos,_pocaCount
     _dataIndex = 0
     _path = ''
-    _baseline = np.zeros((8, 36)).astype('int64')
-    _EnergySpectrumData = np.zeros((8, 36, 4095)).astype('int64')
+    resetBaseline()
+    clearEnergySpetrumData()
+    clearPocaPostion()
 
 # 清空能谱数据
 def clearEnergySpetrumData():
@@ -127,6 +146,18 @@ def clearEnergySpetrumData():
 # 重置基线设置
 def resetBaseline():
     _baseline = np.zeros((8, 36)).astype('int64')
+
+# 清空poca点数据
+def clearPocaPostion():
+    _pocaPos = np.empty((500, 3))
+    _pocaCount = 0
+    resetAlarm()
+
+# 重置报警索引
+def resetAlarm():
+    _alarmIndex = _pocaCount
+    _alarmTime = time.time()
+
 #--------------output-------------
 # 获取h5数据指向
 def getH5Data() -> h5Data:
@@ -179,6 +210,24 @@ def getBaseline(tier: int = None, channel: int = None):
             return _baseline[tier]
         else:
             return _baseline[tier][channel]
+
+# 获取poca点数据
+def getPocaPosition():
+    return _pocaPos[:_pocaCount]
+
+# 检测是否报警
+def alarm():
+    PoCA = _pocaPos[_alarmIndex:_pocaCount]
+    t = time.time() - _alarmTime
+    threshold = [0.9, 1.7, 2.2, 3.2, 5.2, 7.6]
+    confidence= [0.59, 0.78, 0.85, 0.88, 0.891, 0.912]
+    if PoCA.shape[0] > 60 and t > 60:
+        idx = int(t // 60 - 1)
+        if idx > 5:
+            idx = 5
+        return calculationTools.checkHighZ(PoCA,threshold[idx]),confidence[idx]
+    else:
+        return None,0
 
 if __name__ == "__main__":
     import pyqtgraph.examples

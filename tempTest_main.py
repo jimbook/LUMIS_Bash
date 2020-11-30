@@ -17,7 +17,7 @@ def sendThread(_s: socket, path: str, sleep: float = 0.1):
     :param sleep: 发送间隔
     :return:
     '''
-    time.sleep(sleep*15)
+    time.sleep(1.5)
     with open(path, 'rb') as binaryFile:
         print('sendThread:', 'start')
         while True:
@@ -35,14 +35,14 @@ def sendThread(_s: socket, path: str, sleep: float = 0.1):
     time.sleep(100)
     _s.close()
 
-binaryPath =  './testData/binaryData/20201125_1421_with.dat'#'testData/binaryData/nowData/20200930_1140-2109.dat'
+binaryPath =  'testData/binaryData/20201126-1601.dat'#'testData/binaryData/nowData/20200930_1140-2109.dat'
 if __name__ == '__main__':
     m_thread = Process(name='share data manager', target=getShare, args=(True,))
     m_thread.start()
     time.sleep(3)
     dataChannel = getShare(False)
     s_socket, r_socket = socketpair()
-    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, binaryPath))
+    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, binaryPath,0))
     r_thread = Process(name='data receive thread', target=connectThread, args=(dataChannel, r_socket))
     s_thread.start()
     r_thread.start()

@@ -151,7 +151,8 @@ if __name__ == '__main__':
         data_L = h5Data("./testData/h5Data/tempData_10.28_10_20_54.h5", "r")
         data_Z = h5Data("./testData/h5Data/tempData_10.27_14_12_02.h5", "r")
         data_U = h5Data("./testData/h5Data/tempData_10.30_13_19_39.h5", "r")
-        data = data_U.getData(-2)
+        d = h5Data("testData/h5Data/2020_11_28/tempData_22_00_33.h5","r")
+        data = d.getData(-2)
         ex.setData(data)
         ex.show()
     except:

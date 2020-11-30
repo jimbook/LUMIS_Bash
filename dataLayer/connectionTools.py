@@ -14,7 +14,7 @@ from datetime import datetime
 from multiprocessing import Queue, Event, SimpleQueue
 from dataLayer.shareMemory import getShare
 from dataLayer.baseCore import shareStorage, h5Data
-from dataLayer import sizeUnit_binary
+from dataLayer import sizeUnit_binary,errlog
 # ----------仪器通讯地址
 _devIP = '192.168.10.16'
 _TCPport = 24
@@ -617,8 +617,10 @@ def dataDecode(h5: h5Data, decodeTool: Lumis_Decode):
             event = decodeTool.decodingOneEventData()
             # 将数据导入h5文件中（需要检查当前事件是否全为空包）
             if event.shape[0] != 0:
-                if event[0][-2] < eventID:
+                if event[0][-2] <= eventID:
                     h5.newSets()
+                # elif eventID == event[0][-2]:
+                #
                 eventID = event[0][-2]
                 h5.addToDataSet(event)
     except asyncio.CancelledError:

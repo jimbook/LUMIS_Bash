@@ -249,7 +249,6 @@ class GL3DWidget(QWidget,Ui_Form):
 
     def setMore(self):
         # define parameter
-        self.index_memory = 0
         self.zoom = 30
         self.translate = np.array([320, 350, 600])
         self.modelList = []
@@ -270,8 +269,6 @@ class GL3DWidget(QWidget,Ui_Form):
         self.widget_GL.addItem(self.scatterItem)
         # add 3D auxiliary item
         grid = gl.GLGridItem()
-        #grid.setSize(x=7,y=7)
-        #grid.translate(dx=5,dy=5,dz=5)
         self.widget_GL.addItem(grid)
         vertex = np.array([[-10,10,0],[-10,10,10]])
         for i in range(8):
@@ -321,10 +318,6 @@ class GL3DWidget(QWidget,Ui_Form):
         self.widget_GL.addItem(back)
         self.modelList.extend([leaf,right,back])
 
-    def setData(self,data:pd.DataFrame):
-        self.pocaPos = PocaPosition(data)
-        self.index_memory = data.shape[0]
-
     @pyqtSlot(bool)
     def setModelVisible(self, visible: bool):
         for i in self.modelList:
@@ -332,22 +325,18 @@ class GL3DWidget(QWidget,Ui_Form):
 
     @pyqtSlot()
     def plotUpdate(self):
-        poca = self.pocaPos[(self.pocaPos[:,3] > self.doubleSpinBox_minAngle.value()) & (self.pocaPos[:,3] < self.doubleSpinBox_maxAngle.value())]
-        poca = poca[(poca[:,2] > self.doubleSpinBox_minZ.value()) & (poca[:,2] < self.doubleSpinBox_maxZ.value())]
-        tmp = poca[:,3] / np.max(self.pocaPos[:,3])
-        pos = (poca[:,:3] - self.translate) / self.zoom
-        ColorMap = self.widget_colorMap.colorMap().mapToFloat(data=tmp)
-        self.scatterItem.setData(pos=pos,color = ColorMap,size=tmp*10)
+        if self.pocaPos.shape[0] > 0:
+            poca = self.pocaPos[(self.pocaPos[:,3] > self.doubleSpinBox_minAngle.value()) & (self.pocaPos[:,3] < self.doubleSpinBox_maxAngle.value())]
+            poca = poca[(poca[:,2] > self.doubleSpinBox_minZ.value()) & (poca[:,2] < self.doubleSpinBox_maxZ.value())]
+            tmp = poca[:,3] / np.max(self.pocaPos[:,3])
+            pos = (poca[:,:3] - self.translate) / self.zoom
+            ColorMap = self.widget_colorMap.colorMap().mapToFloat(data=tmp)
+            self.scatterItem.setData(pos=pos,color = ColorMap,size=tmp*10)
 
     @pyqtSlot(int)
-    def dataUpdate(self,reset: int = 0):
-        if reset == 0:
-            newPoca,self.index_memory = dataStorage.calculationData(PocaPosition,startIndex=self.index_memory)
-            self.pocaPos = np.append(self.pocaPos,newPoca)
-            self.plotUpdate()
-        else:
-            self.pocaPos,self.index_memory = dataStorage.calculationData(PocaPosition,startIndex=0)
-            self.plotUpdate()
+    def dataUpdate(self):
+        self.pocaPos = dataStorage.getPocaPosition()
+        self.plotUpdate()
 
 class leadBrick(gl.GLMeshItem):
     def __init__(self,modelName = 0,zoom = 30,color = (255,155,33,33)):

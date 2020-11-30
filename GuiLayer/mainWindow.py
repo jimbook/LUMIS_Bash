@@ -70,6 +70,7 @@ class window(QMainWindow,Ui_MainWindow):
         self.pushButton_threeD_addPlot.clicked.connect(self.plot3D_event)
         #auxiliary event
         self.messageSingal.connect(self.addMessage) # 将消息队列中的消息打印到消息栏
+        self.updateSingal.connect(self.alarm_event)
         # stop measurment
         self.timer_measure.timeout.connect(self.stopMeasurment_event)
         self.timer.timeout.connect(self.timeOut_event)
@@ -78,6 +79,8 @@ class window(QMainWindow,Ui_MainWindow):
         self.action_baseline_measureBaseline.triggered.connect(self.action_receiveBaselineDataThread_event)
         self.action_offlineDataShow.triggered.connect(self.action_offlineDataShow_event)
         self.action_dataPlayBack.triggered.connect(self.action_dataPlayBack_event)
+        # toolBox: alarm event
+        self.pushButton_alarm_clear.clicked.connect(dataStorage.resetAlarm)
 
     # init: load config file index
     # 初始化：读入配置文件列表
@@ -332,8 +335,10 @@ class window(QMainWindow,Ui_MainWindow):
         else:
             print('file')
             filePath = QFileDialog.getOpenFileName(self, '选择回放数据' ,'./data',"数据文件 (*.h5)")[0]
-            t = threading.Thread(target=self.dataPlayBack_thread, args=(filePath,))
-            t.start()
+            print("file path:\t",filePath)
+            if len(filePath) > 0:
+                t = threading.Thread(target=self.dataPlayBack_thread, args=(filePath,))
+                t.start()
 
     # 线程函数：数据回放
     def dataPlayBack_thread(self,h5dataPath: str):
@@ -345,13 +350,22 @@ class window(QMainWindow,Ui_MainWindow):
             tmpData = h5.getData(i)
             k = 0
             u,idx = np.unique(tmpData[_Index[-2]].values,True)
-            while k + 300 < idx.shape[0]:
-                dataStorage.playBackAddData(tmpData.loc[idx[k]:idx[k+300]].values)
-                self.updateSingal.emit(0)
-                k += 300
+            print(u)
+            print(idx)
+            t = 0
+            while k + 600 < idx.shape[0]:
+                print("idx:",idx[k],idx[k+600])
+                dataStorage.playBackAddData(tmpData.loc[idx[k]:idx[k+600]].values)
+                #if (k - t)/500 > 2
+                k += 600
+                t += 1
+                if t > 10:
+                    t = 0
+                    self.updateSingal.emit(0)
             dataStorage.playBackAddData(tmpData[idx[k]:].values)
             self.updateSingal.emit(0)
             dataStorage.playBackNewSet()
+            time.sleep(0.1)
         dataStorage.EndPlayBackModule()
 
     #auxiliary: erver interval will call this function to refresh clock widget
@@ -364,6 +378,21 @@ class window(QMainWindow,Ui_MainWindow):
         _sec = _t % 60
         self.lcdNumber_s_ms.display("{:4.2f}".format(_sec))
         self.lcdNumber_h_m.display("{:0>d}:{:0>d}".format(_hour,_min))
+
+    #辅助函数：每次数据更新时会调用,更新警报信息
+    @pyqtSlot()
+    def alarm_event(self):
+        checkAlarm,confidence = dataStorage.alarm()
+        if checkAlarm is None:
+            msg = "正在检测...."
+        else:
+            if checkAlarm:
+                msg = "检测到高密度物体，置信度{:.2%}".format(confidence)
+                if self.checkBox_alarm_messageBox.isChecked():
+                    QMessageBox.information(self,"报警","检测到高密度物体，置信度{:.2%}".format(confidence))
+            else:
+                msg = "暂时未检测到高密度物体"
+        self.statusBar().showMessage(msg)
 
 
 

@@ -5,7 +5,7 @@ import pandas as pd
 from dataLayer.auxiliaryFunction import *
 from dataLayer.parameterStorage import *
 #将数据处理成可以加速处理的数据格式-更快
-@timeCount
+# @timeCount
 def pretreatment(rawData: pd.DataFrame,replaceInfo:np.array):
     '''
     将数据处理成可以加速处理的数据格式-更快
@@ -28,7 +28,7 @@ def pretreatment(rawData: pd.DataFrame,replaceInfo:np.array):
     return first[:,:,:32]
 
 # 从数据中获取基线和阈值
-@timeCount
+# @timeCount
 def getParameter(rawData):
     baseline = np.empty((8,36))
     threshold = np.empty((8, 36))
@@ -42,7 +42,7 @@ def getParameter(rawData):
     return baseline,threshold
 
 # 用平均值法均一化、卡阈值、减去基线（同时低于基线的置零）-可加速
-@timeCount
+# @timeCount
 def meanScale(event: np.array,mean_scale: np.array,threshold: np.array,baseline: np.array):
     '''
     用平均值法均一化、卡阈值、减去基线（同时低于基线的置零）-可加速
@@ -54,14 +54,14 @@ def meanScale(event: np.array,mean_scale: np.array,threshold: np.array,baseline:
     :param baseline: (8,32)
     :return:(None,8,32)
     '''
-    first = event * mean_scale
-    np.place(first,first < threshold*mean_scale,0)
-    second = first - baseline*mean_scale
+    first = event # * mean_scale
+    np.place(first,first < threshold,0) #*mean_scale
+    second = first - baseline #*mean_scale
     np.place(second,second < 0,0)
     return second
 
 # 检查事件是否符合条件（1~2个bar触发，两个bar触发时必须相邻）并将数据转换成指定格式-可加速
-@timeCount
+# @timeCount
 def checkTriggerAvailable(event: np.array):
     '''
     检查事件是否符合条件（1~2个bar触发，两个bar触发时必须相邻）并将数据转换成指定格式
@@ -89,7 +89,7 @@ def checkTriggerAvailable(event: np.array):
     return output[triggerCheck]
 
 # 快速计算触发点位置（没有迭代）
-@timeCount
+# @timeCount
 def fastCalculateTriggerPositions(event: np.array,geometry: np.array, detectorSize: np.array):
     '''
     快速计算触发点位置（没有迭代,默认位2个相邻bar触发，兼容单bar触发,没有倾斜修正）
@@ -115,7 +115,7 @@ def fastCalculateTriggerPositions(event: np.array,geometry: np.array, detectorSi
     return output
 
 # 快速反演粒子径迹（仅用于xy正交放置时）
-@timeCount
+# @timeCount
 def fastCalculateParticleTrack(event: np.array,geometry: np.array, detectorSize: np.array,wanted_z: np.array = None):
     '''
     快速反演粒子径迹（仅用于xy正交放置时）
@@ -142,7 +142,7 @@ def fastCalculateParticleTrack(event: np.array,geometry: np.array, detectorSize:
     return output
 
 # 计算poca点
-@timeCount
+# @timeCount
 def calculatePocaPostions(event: np.array):
     '''
     :param event: (None,4,3)[x,y,z]
@@ -213,7 +213,11 @@ class pocaAnalizy(object):
 
     @property
     def pocaPositions(self):
-        return calculatePocaPostions(self.HitPositions)
+        try:
+            return calculatePocaPostions(self.HitPositions)
+        except ValueError:
+            import traceback
+            traceback.print_exc()
 
     # @property
     # def rawData(self):

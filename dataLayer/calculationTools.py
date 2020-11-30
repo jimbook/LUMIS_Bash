@@ -157,8 +157,36 @@ def PocaPosition(data: pd.DataFrame) -> np.array:
     :param data:
     :return: shape = (None,4) [x,y,z,theta]
     '''
-    a0 = pocaAnalizy(data)
-    return a0.pocaPositions[:, :4]
+    a0 = pocaAnalizy(data).pocaPositions
+    if a0.shape[0] > 0:
+        return a0[:, :4]
+    else:
+        return a0
+
+# 判断是否存在高Z物体
+def checkHighZ(PoCAPos:np.array,threshole = 3):
+    '''
+
+    :param PoCAPos: (None,4) [x,y,z,theta]
+    :return: bool
+    '''
+    PoCA_angel = PoCAPos
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 2] < 900) & (PoCA_angel[:, 2] > 600)]
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 0] > 325-50) & (PoCA_angel[:, 0] < 325+50)]
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 1] > 325-50) & (PoCA_angel[:, 1] < 325+50)]
+
+    PoCA_voxels = PoCA_angel[:, 0] // 40 + PoCA_angel[:, 1] // 40 * 100 + PoCA_angel[:, 2] // 40 * 100 * 100
+    PoCA_angel_weight = PoCA_angel[:, -1] < 0.3
+    PoCA_angel_weight = PoCA_angel_weight * 0.1
+    PoCA_angel_weight[PoCA_angel_weight == 0] = 1
+    PoCA = pd.DataFrame({"theta": np.power(PoCA_angel[:, -1], 2) / 20 * PoCA_angel_weight,
+                         "voxels": PoCA_voxels.astype(np.int)}).sort_values("voxels")
+    voxels = PoCA.groupby("voxels").mean()
+    voxel_max = np.max(voxels["theta"].values)
+    if voxel_max >= threshole:
+        return True
+    else:
+        return False
 
 if __name__ == '__main__':
     pass
