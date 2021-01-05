@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="headphones" class="cls-1" d="M1308,356a4,4,0,1,1-4-4A4,4,0,0,1,1308,356Zm-4-2a2,2,0,1,0,2,2A2,2,0,0,0,1304,354Zm-1-6c0-3.866-3.13-10-7-10s-7,6.134-7,10v4h-2v-4c0-4.971,4.03-12,9-12s9,7.029,9,12v4h-2v-4Zm-11,8a4,4,0,1,1-4-4A4,4,0,0,1,1292,356Zm-4-2a2,2,0,1,0,2,2A2,2,0,0,0,1288,354Z" transform="translate(-1284 -336)"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22">
+  <defs>
+    <style>
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="wallet" class="cls-1" d="M1090,359h-20a2,2,0,0,1-2-2V339a2,2,0,0,1,2-2h16a2,2,0,0,1,2,2v2h2a2,2,0,0,1,2,2v14A2,2,0,0,1,1090,359Zm-4-20h-16v2h16v-2Zm4,4h-20v14h20V343Zm-5,4a3,3,0,1,1-3,3A3,3,0,0,1,1085,347Zm0,4a1,1,0,1,0-1-1A1,1,0,0,0,1085,351Z" transform="translate(-1068 -337)"/>
+</svg>

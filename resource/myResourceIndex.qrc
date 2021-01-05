@@ -1,0 +1,108 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>NewIcon/contract.svg</file>
+    <file>NewIcon/download.svg</file>
+    <file>NewIcon/icons8-news.svg</file>
+    <file>NewIcon/turn-left.svg</file>
+    <file>NewIcon/x-button.svg</file>
+    <file>NewIcon/icons8-news.svg</file>
+    <file>feather-v1.1/svg-single/arrow-left.svg</file>
+    <file>feather-v1.1/svg-single/globe.svg</file>
+    <file>feather-v1.1/svg-single/monitor.svg</file>
+    <file>bikini60s/SVGs/bikini60s_button-add.svg</file>
+    <file>bikini60s/SVGs/bikini60s_folder.svg</file>
+    <file>NewIcon/Graphicloads-100-Flat-2-Add.ico</file>
+    <file>NewIcon/Graphicloads-Colorful-Long-Shadow-Button-1-play.ico</file>
+    <file>NewIcon/Graphicloads-Colorful-Long-Shadow-Button-2-pause.ico</file>
+    <file>NewIcon/Graphicloads-Colorful-Long-Shadow-Button-2-stop.ico</file>
+    <file>NewIcon/Graphicloads-Colorful-Long-Shadow-Chart.ico</file>
+    <file>NewIcon/Graphicloads-Colorful-Long-Shadow-Minus.ico</file>
+    <file>NewIcon/Pelfusion-Long-Shadow-Media-Settings.ico</file>
+    <file>Image/YyJqeQ9Wqr.png</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-01.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-02.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-03.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-04.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-05.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-06.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-07.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-08.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-09.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-10.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-11.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-12.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-13.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-14.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-15.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-16.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-17.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-18.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-19.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-20.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-21.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-22.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-23.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-24.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-25.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-26.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-27.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-28.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-29.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-30.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-31.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-32.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-33.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-34.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-35.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-36.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-37.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-38.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-39.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-40.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-41.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-42.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-43.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-44.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-45.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-46.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-47.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-48.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-49.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-50.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-51.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-52.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-53.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-54.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-55.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-56.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-57.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-58.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-59.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-60.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-61.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-62.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-63.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-64.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-65.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-66.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-67.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-68.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-69.svg</file>
+    <file>70-basic-icons/SVGs/70 Basic Icons-all-70.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_calendar-time-date-schedule.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_finance-markting-money-coin-dollar-molecule.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-bill-payment-invoice-receipt.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-email-mail-information-news.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-hand-give-bar-chart-statistic.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-laptop-chat-comment-dialogue.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-mobile-information-speaker-news.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_marketing-report-statistic-document-file.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_money-dollar-cash-payment.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-application-like-thumb.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-computer-gauge-speed-monitor.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-map-location-place-search.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-mobile-setting-gear-cog-06.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-mobile-setting-gear-cog-07.svg</file>
+    <file>free-business-marketing-icons/free-business-marketing-icons/SVG/1_seo-reward-license-certificate-contract.svg</file>
+  </qresource>
+</RCC>

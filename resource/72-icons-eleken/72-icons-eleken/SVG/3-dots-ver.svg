@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="6" height="24" viewBox="0 0 6 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #101010;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="_3-dots-ver" data-name="3-dots-ver" class="cls-1" d="M1008,303a3,3,0,1,1,3-3A3,3,0,0,1,1008,303Zm0-4a1,1,0,1,0,1,1A1,1,0,0,0,1008,299Zm0-5a3,3,0,1,1,3-3A3,3,0,0,1,1008,294Zm0-4a1,1,0,1,0,1,1A1,1,0,0,0,1008,290Zm0,16a3,3,0,1,1-3,3A3,3,0,0,1,1008,306Zm0,4a1,1,0,1,0-1-1A1,1,0,0,0,1008,310Z" transform="translate(-1005 -288)"/>
+</svg>

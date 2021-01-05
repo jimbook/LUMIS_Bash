@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" viewBox="0 0 24 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #101010;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="tumbler" class="cls-1" d="M1300,212h-8a8,8,0,0,1,0-16h8A8,8,0,0,1,1300,212Zm0-14h-8a6,6,0,0,0,0,12h8A6,6,0,0,0,1300,198Zm-7,10a4,4,0,1,1,4-4A4,4,0,0,1,1293,208Zm0-6a2,2,0,1,0,2,2A2,2,0,0,0,1293,202Z" transform="translate(-1284 -196)"/>
+</svg>

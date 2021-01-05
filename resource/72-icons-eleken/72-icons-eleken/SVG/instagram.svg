@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="instagram" class="cls-1" d="M1522,456h-20a2,2,0,0,1-2-2V434a2,2,0,0,1,2-2h20a2,2,0,0,1,2,2v20A2,2,0,0,1,1522,456Zm0-22h-20v9h5.1a5,5,0,0,1,9.8,0h5.1v-9Zm-13,10a3,3,0,1,0,3-3A3,3,0,0,0,1509,444Zm13,1h-5.1a5,5,0,0,1-9.8,0H1502v9h20v-9Zm-3.5-9a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,1518.5,436Z" transform="translate(-1500 -432)"/>
+</svg>

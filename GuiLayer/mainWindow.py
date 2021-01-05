@@ -10,7 +10,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from GuiLayer.myPlotWidget import subPlotWin_singal,subPlotWin_coincidence, subPlotWin_eventTrackShow, subPlotWin_eventXYTrackShow,GL3DWidget
-from GuiLayer.myWidget import setConfigurationDailog_basic
+from GuiLayer.myWidget import setConfigurationDailog_basic,openFileDialog
 from dataLayer import _Index
 from dataLayer.connectionTools import linkGBT
 from dataLayer.baseCore import shareStorage, h5Data
@@ -334,9 +334,9 @@ class window(QMainWindow,Ui_MainWindow):
             QMessageBox.warning(self,'警告','不能在测量时进行数据回放')
         else:
             print('file')
-            filePath = QFileDialog.getOpenFileName(self, '选择回放数据' ,'./data',"数据文件 (*.h5)")[0]
+            filePath,choose = openFileDialog.openFilePath()
             print("file path:\t",filePath)
-            if len(filePath) > 0:
+            if choose:
                 t = threading.Thread(target=self.dataPlayBack_thread, args=(filePath,))
                 t.start()
 

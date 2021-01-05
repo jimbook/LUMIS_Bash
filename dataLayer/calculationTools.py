@@ -125,6 +125,8 @@ def ChooseGoodEvent(data: pd.DataFrame) -> pd.DataFrame:
         _d = d.loc[i]
         if isinstance(_d, pd.Series):
             continue
+        elif _d.shape[0] == 0:
+            continue
         _s = MarkOneEvent(_d)
         if _s == boardNum*13:
             return d.loc[i]

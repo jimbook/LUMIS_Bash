@@ -42,7 +42,7 @@ if __name__ == '__main__':
     time.sleep(3)
     dataChannel = getShare(False)
     s_socket, r_socket = socketpair()
-    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, binaryPath,0))
+    s_thread = Process(name='send binary thread', target=sendThread, args=(s_socket, binaryPath))
     r_thread = Process(name='data receive thread', target=connectThread, args=(dataChannel, r_socket))
     s_thread.start()
     r_thread.start()

@@ -73,11 +73,15 @@ def mergeEnergySpectrum(newData: pd.DataFrame):
 # 新增数据：计算poca点
 def calculatePocaPosition(newData:pd.DataFrame):
     global _pocaPos,_pocaCount
-    newPoca = calculationTools.PocaPosition(newData)
-    while _pocaCount+newPoca.shape[0] >= _pocaPos.shape[0]:
-        _pocaPos = np.append(_pocaPos, np.empty((500, 4))).reshape((-1, 4))
-    _pocaPos[_pocaCount:_pocaCount+newPoca.shape[0]] = newPoca[:,:4]
-    _pocaCount += newPoca.shape[0]
+    try:
+        newPoca = calculationTools.PocaPosition(newData)
+        while _pocaCount+newPoca.shape[0] >= _pocaPos.shape[0]:
+            _pocaPos = np.append(_pocaPos, np.empty((500, 4))).reshape((-1, 4))
+        _pocaPos[_pocaCount:_pocaCount+newPoca.shape[0]] = newPoca[:,:4]
+        _pocaCount += newPoca.shape[0]
+    except:
+        import traceback
+        traceback.print_exc()
 
 #*******************外部函数********************
 
@@ -219,8 +223,8 @@ def getPocaPosition():
 def alarm():
     PoCA = _pocaPos[_alarmIndex:_pocaCount]
     t = time.time() - _alarmTime
-    threshold = [0.9, 1.7, 2.2, 3.2, 5.2, 7.6]
-    confidence= [0.59, 0.78, 0.85, 0.88, 0.891, 0.912]
+    threshold = [0.9, 1.7, 2.2, 3.2, 5.2, 7.6, 11.6]
+    confidence= [0.59, 0.78, 0.85, 0.88, 0.891, 0.912, 0.964]
     if PoCA.shape[0] > 60 and t > 60:
         idx = int(t // 60 - 1)
         if idx > 5:

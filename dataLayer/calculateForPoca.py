@@ -218,6 +218,7 @@ class pocaAnalizy(object):
         except ValueError:
             import traceback
             traceback.print_exc()
+            return np.array([])
 
     # @property
     # def rawData(self):

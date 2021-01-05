@@ -1,3 +1,4 @@
+import os
 import time
 from multiprocessing.connection import Connection
 import h5py
@@ -55,55 +56,143 @@ def angelAnalyse(data):
     PoCA_angel_weight = PoCA_angel[:, -1] < 0.3
     PoCA_angel_weight = PoCA_angel_weight * 0.1
     PoCA_angel_weight[PoCA_angel_weight == 0] = 1
-    PoCA = pd.DataFrame({"theta":np.power(PoCA_angel[:, -1],2) / 20 * PoCA_angel_weight, "voxels":PoCA_voxels.astype(np.int)}).sort_values("voxels")
-    PoCA_max = PoCA.groupby("voxels").mean()
-    if PoCA_max.shape[0] > 0:
-        return np.max(PoCA_max["theta"].values)
-    else:
-        return -0.1
+    PoCA = pd.DataFrame({"theta":np.power(PoCA_angel[:, -1],2) / 20 , "voxels":PoCA_voxels.astype(np.int)}).sort_values("voxels")#* PoCA_angel_weight
+    PoCA_max = PoCA["theta"].mean() #PoCA.groupby("voxels").mean()
+    return np.array([PoCA_max])
+    # if PoCA_max.shape[0] > 0:
+    #     return np.max(PoCA_max["theta"].values)
+    # else:
+    #     return 0
 
-def SDE(data,loopSize: int):
+def calculateTheta(data:pd.DataFrame):
+    a0 = pocaAnalizy(data)
+    pos = a0.HitPositions
+    def getTheta(event:np.array):
+        '''
+
+        :param hit: (4,3)
+        :return:
+        '''
+        inVector = (event[1] - event[0])
+        outVector = (event[3] - event[2])
+        midVector = (event[2] - event[1])
+        longSide = event[2] - event[0]
+
+        projection = np.array([0, 2])
+        normal_x = np.array([1, 0, 0])# (x,z)
+        normal_y = np.array([0, 1, 0])
+        normal_z = np.array([0, 0, 1])
+
+
+
+        in_long = np.dot(longSide[projection], inVector[projection])
+        out_long = np.dot(longSide[projection], outVector[projection])
+        in_out = np.dot(inVector[projection], outVector[projection])
+        in_mid = np.dot(inVector[projection],midVector[projection])
+        mid_out = np.dot(midVector[projection],outVector[projection])
+        in_in = np.dot(inVector[projection], inVector[projection])
+        out_out = np.dot(outVector[projection], outVector[projection])
+        mid_mid = np.dot(midVector[projection],midVector[projection])
+
+
+        # 计算夹角
+        # 单位：°
+        # theta = np.arccos(np.sqrt((in_out * in_out) / (in_in * out_out))) * 180 / np.pi
+        # theta_0 = np.arccos(np.sqrt((in_mid * in_mid) / (in_in * mid_mid))) * 180 / np.pi
+        # theta_1 = np.arccos(np.sqrt((mid_out * mid_out) / (mid_mid * out_out))) * 180 / np.pi
+
+        #
+        theta_0 = np.arccos((np.dot(normal_x[projection],inVector[projection]) / np.sqrt(in_in)))
+        theta_1 = np.arccos((np.dot(normal_x[projection],midVector[projection]) / np.sqrt(mid_mid)))
+        theta_2 = np.arccos((np.dot(normal_x[projection],outVector[projection]))/ np.sqrt(out_out))
+
+        # idx = np.array([[0,1]])
+        # theta_x_0 = np.arccos(np.sqrt([0,]))
+
+        # 计算poca点
+        if in_in < 1e-4:
+            t1 = in_long / in_in
+            t2 = - out_long / out_out
+        else:
+            t1 = (in_out * out_long - out_out * in_long) / (in_out ** 2 - in_in * out_out)
+            t2 = in_in / in_out * t1 - (in_long / in_out)
+        return *((event[0] + t1 * inVector) + (event[2] + t2 * outVector)) / 2, theta_0,theta_1,theta_2
+
+
+    result = np.empty((pos.shape[0],6))
+    for i in tqdm(range(pos.shape[0])):
+        result[i,:] = np.array(getTheta(pos[i]))
+
+    return result
+
+def SDE(data,loopSize: int, timeIndex: int = 1):
     slc = sliceData(data)
     result = np.empty((loopSize,))
     for i in tqdm(range(loopSize)):
-        result[i] = angelAnalyse(slc.getRandomEvents(130*10))
+        result[i] = angelAnalyse(slc.getRandomEvents(130*timeIndex))
     return result
 
 def ROC(SDE_Ture,SDE_False,step = 0.1):
 
-    result = np.empty((int(15/step),2))
+    result = np.empty((int(15/step),4))
     for i in tqdm(range(int(15/step))):
         result[i,0] = np.sum(SDE_Ture > i*step)/SDE_Ture.shape[0]
         result[i,1] = np.sum(SDE_False> i*step)/SDE_False.shape[0]
+        result[i,2] = np.sum(SDE_Ture < i*step)/SDE_Ture.shape[0]
+        result[i,3] = np.sum(SDE_False< i*step)/SDE_False.shape[0]
     return result
+
+def getPoCApos(data):
+    PoCA_angel = PocaPosition(data)[:, :4]
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 2] < 800) & (PoCA_angel[:, 2] > 650)]
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 0] > 270) & (PoCA_angel[:, 0] < 370)]
+    PoCA_angel = PoCA_angel[(PoCA_angel[:, 1] > 270) & (PoCA_angel[:, 1] < 370)]
+    return PoCA_angel
 
 if __name__ == '__main__':
 
-    data_null = h5Data("testData/h5Data/2020_11_28/tempData_17_53_55.h5", 'r').getData(0)
-    data_Pb = h5Data("testData/h5Data/2020_11_28/tempData_22_00_33.h5", 'r').getData(0)
+    data_null = h5Data("testData/h5Data/2020_11_28/tempData_17_53_55.h5", 'r').getData(-2)
+    data_Pb = h5Data("testData/h5Data/2020_11_28/tempData_22_00_33.h5", 'r').getData(-2)
 
-    r_Pb = SDE(data=data_Pb,loopSize=500)
-    r_null = SDE(data_null,500)
+    # for timeIndex in range(,15,1):
+    timeIndex = 4
+    r_Pb = SDE(data_Pb, 500, timeIndex)
+    r_null = SDE(data_null,500, timeIndex)
 
     roc = ROC(r_Pb,r_null)
     v = np.power(0 - roc[:,1], 2) + np.power(1 - roc[:, 0], 2)
     i = np.argmin(v)
     print(i*0.1)
     print(np.sum(r_Pb > i*0.1)/r_Pb.shape[0])
+
+    v2 = np.power(0 - roc[:,2], 2) + np.power(1 - roc[:, 3], 2)
+    i2 = np.argmin(v2)
+    print(i2*0.1)
+    print(np.sum(r_Pb > i2*0.1)/r_Pb.shape[0])
+
     plt.figure()
     plt.hist(x=r_null, bins=180, color=(0, 1, 0, 0.3),label="null",
              density=True)
     plt.hist(x=r_Pb, bins=180, color=(1, 0, 0, 0.3), label="Pb",
              density=True)
     plt.legend()
-    plt.show()
-    plt.close()
+    #plt.savefig(os.path.join('./res/2020-12-1/','ScatteringDensity_%d_min.png'%timeIndex), dpi=600)
+    # plt.show()
+    # plt.close()
 
-    plt.figure()
-    plt.plot(roc[:,1],roc[:,0],'b--',marker="x", label="120s")
-    plt.legend()
+    # plt.figure(dpi = 600)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    fig.suptitle('threshold: %.4f, confidence:%.4f'%(i2*0.1, np.sum(r_Pb > i2*0.1)/r_Pb.shape[0]))
+    ax.plot(roc[:,1],roc[:,0],'b--',marker="x", label="TP-FP")
+    ax.plot(roc[:, 3], roc[:, 2], 'r--', marker="x", label="TN-FN")
+    ax.set_ylim(0, 1)
+    ax.set_xlim(0, 1)
+    ax.legend()
     plt.show()
     plt.close()
+    #fig.savefig(os.path.join('./res/2020-12-1/','ROC_time_%d_min.png'%timeIndex), dpi=600)
+# plt.show()
+    # plt.close()
     # pos_Pb = PocaPosition(data=data_Pb)
     # pos_null = PocaPosition(data_null)
     #
@@ -135,76 +224,17 @@ if __name__ == '__main__':
     # plt.close()
 
 
-    # def calculateTheta(data:pd.DataFrame):
-    #     a0 = pocaAnalizy(data)
-    #     pos = a0.HitPositions
-    #     def getTheta(event:np.array):
-    #         '''
-    #
-    #         :param hit: (4,3)
-    #         :return:
-    #         '''
-    #         inVector = (event[1] - event[0])
-    #         outVector = (event[3] - event[2])
-    #         midVector = (event[2] - event[1])
-    #         longSide = event[2] - event[0]
-    #
-    #         projection = np.array([0, 2])
-    #         normal_x = np.array([1, 0, 0])# (x,z)
-    #         normal_y = np.array([0, 1, 0])
-    #         normal_z = np.array([0, 0, 1])
-    #
-    #
-    #
-    #         in_long = np.dot(longSide[projection], inVector[projection])
-    #         out_long = np.dot(longSide[projection], outVector[projection])
-    #         in_out = np.dot(inVector[projection], outVector[projection])
-    #         in_mid = np.dot(inVector[projection],midVector[projection])
-    #         mid_out = np.dot(midVector[projection],outVector[projection])
-    #         in_in = np.dot(inVector[projection], inVector[projection])
-    #         out_out = np.dot(outVector[projection], outVector[projection])
-    #         mid_mid = np.dot(midVector[projection],midVector[projection])
-    #
-    #
-    #         # 计算夹角
-    #         # 单位：°
-    #         # theta = np.arccos(np.sqrt((in_out * in_out) / (in_in * out_out))) * 180 / np.pi
-    #         # theta_0 = np.arccos(np.sqrt((in_mid * in_mid) / (in_in * mid_mid))) * 180 / np.pi
-    #         # theta_1 = np.arccos(np.sqrt((mid_out * mid_out) / (mid_mid * out_out))) * 180 / np.pi
-    #
-    #         #
-    #         theta_0 = np.arccos((np.dot(normal_x[projection],inVector[projection]) / np.sqrt(in_in)))
-    #         theta_1 = np.arccos((np.dot(normal_x[projection],midVector[projection]) / np.sqrt(mid_mid)))
-    #         theta_2 = np.arccos((np.dot(normal_x[projection],outVector[projection]))/ np.sqrt(out_out))
-    #
-    #         # idx = np.array([[0,1]])
-    #         # theta_x_0 = np.arccos(np.sqrt([0,]))
-    #
-    #         # 计算poca点
-    #         if in_in < 1e-4:
-    #             t1 = in_long / in_in
-    #             t2 = - out_long / out_out
-    #         else:
-    #             t1 = (in_out * out_long - out_out * in_long) / (in_out ** 2 - in_in * out_out)
-    #             t2 = in_in / in_out * t1 - (in_long / in_out)
-    #         return *((event[0] + t1 * inVector) + (event[2] + t2 * outVector)) / 2, theta_0,theta_1,theta_2
-    #
-    #
-    #     result = np.empty((pos.shape[0],6))
-    #     for i in tqdm(range(pos.shape[0])):
-    #         result[i,:] = np.array(getTheta(pos[i]))
-    #
-    #     return result
-    #
+
+
 
     # theta_Pb = calculateTheta(data_Pb)
-    # theta_Pb = theta_Pb[(theta_Pb[:, 0] > 100) & (theta_Pb[:, 0] < (650 - 100)) &
-    #                         (theta_Pb[:, 1] > 100) & (theta_Pb[:, 1] < (650 - 100)) &
-    #                         (theta_Pb[:, 2] < 900) & (theta_Pb[:, 2] > 600)]
+    # theta_Pb = theta_Pb[(theta_Pb[:, 0] > 270) & (theta_Pb[:, 0] < 370) &
+    #                         (theta_Pb[:, 1] > 270) & (theta_Pb[:, 1] < 370) &
+    #                         (theta_Pb[:, 2] < 800) & (theta_Pb[:, 2] > 650)]
     # theta_null = calculateTheta(data_null)
-    # theta_null = theta_null[(theta_null[:, 0] > 100) & (theta_null[:, 0] < (650 - 100)) &
-    #                   (theta_null[:, 1] > 100) & (theta_null[:, 1] < (650 - 100)) &
-    #                   (theta_null[:, 2] < 900) & (theta_null[:, 2] > 600)]
+    # theta_null = theta_null[(theta_null[:, 0] > 270) & (theta_null[:, 0] < 370) &
+    #                   (theta_null[:, 1] > 270) & (theta_null[:, 1] < 370) &
+    #                   (theta_null[:, 2] <  800) & (theta_null[:, 2] > 650)]
     # idx = np.array([[1,0],[2,1]])
     # for i in idx:
     #     plt.figure()
@@ -214,11 +244,19 @@ if __name__ == '__main__':
     #     plt.show()
     #     plt.close()
     # plt.figure()
-    # plt.hist(x=theta_Pb[:, 3 + idx[0,0]] - theta_Pb[:, 3 + idx[0,1]], bins=180, color=(1, 0, 0, 0.3),
-    #          label="theta_Pb_{}-{}".format(*idx[0]), density=True)
-    # plt.hist(x=theta_Pb[:, 3 + idx[1,0]] - theta_Pb[:, 3 + idx[1,1]], bins=180, color=(0, 1, 0, 0.3),
-    #          label="theta_Pb_{}-{}".format(*idx[1]), density=True)
+    # # plt.hist(x=theta_Pb[:, 3 + idx[0,0]] - theta_Pb[:, 3 + idx[0,1]], bins=180, color=(1, 0, 0, 0.3),
+    # #          label="theta_Pb_{}-{}".format(*idx[0]), density=True)
+    # # plt.hist(x=theta_Pb[:, 3 + idx[1,0]] - theta_Pb[:, 3 + idx[1,1]], bins=180, color=(0, 1, 0, 0.3),
+    # #          label="theta_Pb_{}-{}".format(*idx[1]), density=True)
+    # plt.plot(theta_Pb[:18000, 3 + idx[0,0]] - theta_Pb[:18000, 3 + idx[0,1]],
+    #          theta_Pb[:18000, 3 + idx[1,0]] - theta_Pb[:18000, 3 + idx[1,1]],
+    #          "o",color=(1,0,0,0.3),label="Pb")
+    # plt.plot(theta_null[:18000, 3 + idx[0, 0]] - theta_null[:18000, 3 + idx[0, 1]],
+    #          theta_null[:18000, 3 + idx[1, 0]] - theta_null[:18000, 3 + idx[1, 1]],
+    #          "o",color=(0,1,0,0.3), label="null")
     # plt.legend()
+    # plt.xlabel("theta1-0")
+    # plt.ylabel("theta2-1")
     # plt.show()
     # plt.close()
 

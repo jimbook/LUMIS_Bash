@@ -90,7 +90,7 @@ def binaryCheck(path: str):
 
 if __name__ == '__main__':
     import os
-    #file = h5Data('./data/2020_10_25/tempData_17_03_07.h5','r')
+    file = h5Data('./data/2020_10_25/tempData_17_03_07.h5','r')
     file = h5Data('./testData/h5Data/tempData_10.22_21_38_13.h5', 'r')
     def count(input: np.array):
         return pd.DataFrame(dict(Counter(input)),index=[0])

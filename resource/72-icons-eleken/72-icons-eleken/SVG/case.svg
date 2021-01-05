@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="case" class="cls-1" d="M1234,168h-20a2,2,0,0,1-2-2V150a2,2,0,0,1,2-2h5v-2a2,2,0,0,1,2-2h6a2,2,0,0,1,2,2v2h5a2,2,0,0,1,2,2v16A2,2,0,0,1,1234,168Zm-7-22h-6v2h6v-2Zm7,13h-5a2,2,0,0,1-2,2h-6a2,2,0,0,1-2-2h-5v-2h5a2,2,0,0,1,2-2h6a2,2,0,0,1,2,2h5v-7h-20v16h20v-7Zm-7-1a1,1,0,0,0-1-1h-4a1,1,0,0,0,0,2h4A1,1,0,0,0,1227,158Z" transform="translate(-1212 -144)"/>
+</svg>

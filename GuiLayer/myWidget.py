@@ -443,6 +443,91 @@ class setConfiguration_channelWidget(QWidget,Ui_Form):
             for i in self.channelBiasSpinBoxList:
                 output.append(i.value())
         return output
+
+from UI.openFileDialog import Ui_Dialog
+#打开文件对话框
+class openFileDialog(QDialog,Ui_Dialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.retranslateUi(self)
+        self.setEvent()
+        self.setMore()
+
+    #其他设置
+    def setMore(self):
+        self.Path = ''
+        self.choosed = False
+        self.setWindowTitle('回放数据')
+        self.label_topTip.setText('请选择需要回放的数据文件')
+        self.fileFilter_comboBox.addItems(['数据文件(*.h5)','所有文件(*.*)'])
+        self.treeView.myModel.setNameFilterDisables(False)
+
+    #链接信号与动作
+    def setEvent(self):
+        self.fileFilter_comboBox.currentTextChanged.connect(self.fileFilter_comboBox_event)
+        self.back_toolButton.clicked.connect(self.back_toolButton_clicked_event)
+        self.desktop_toolButton.clicked.connect(self.desktop_toolButton_clicked_event)
+        self.disk_toolButton.clicked.connect(self.disk_toolButton_clicked_event)
+        self.treeView.clicked.connect(self.treeView_clicked_event)
+        self.treeView.doubleClicked.connect(self.treeView_doubleClicked_evnet)
+        self.OK_pushButton.clicked.connect(self.OK_pushButton_clicked_event)
+
+    #右上角图标动作
+    def back_toolButton_clicked_event(self):
+        newPath = self.treeView.myModel.rootPath()
+        if newPath != '':
+            toPath = os.path.split(newPath)[0]
+            self.treeView.setWorkPath(toPath)
+            self.lineEdit_currentChoose.setText(toPath)
+
+    # 动作：从磁盘选择
+    def disk_toolButton_clicked_event(self):
+        self.treeView.setWorkPath('')
+        self.lineEdit_currentChoose.setText('')
+
+    # 动作：从桌面选择
+    def desktop_toolButton_clicked_event(self):
+        path = os.path.join(os.path.expanduser('~'), 'Desktop')
+        if os.path.exists(path):
+            self.treeView.setWorkPath(path)
+            self.lineEdit_currentChoose.setText(path)
+
+    #树控件 单击动作
+    def treeView_clicked_event(self,index):
+        #将值传入line控件
+        path = self.treeView.myModel.filePath(index)
+        self.lineEdit_currentChoose.setText(path)
+
+    #树控件 双击动作
+    def treeView_doubleClicked_evnet(self,index):
+        if self.treeView.myModel.isDir(index):
+            self.treeView.setWorkPath(self.treeView.myModel.filePath(index))
+
+    #下拉选择框 选择改变 动作
+    def fileFilter_comboBox_event(self,text : str):
+        filefilter = text.split('(')[1]
+        self.treeView.myModel.setNameFilters([filefilter[:-1]])
+
+    #确认按钮动作
+    def OK_pushButton_clicked_event(self):
+        if self.lineEdit_currentChoose.text() == '':
+            reply = QMessageBox.information(self,'提示','没有选择任何项目')
+        elif not os.path.exists(self.lineEdit_currentChoose.text()):
+            reply = QMessageBox.information(self,'提示','目标路径不合法')
+        else:
+            self.Path = self.lineEdit_currentChoose.text()
+            self.choosed = True
+            self.close()
+
+    #调用静态方法来快速打开文件对话框，将返回选择文件的路径和是否确认选择的bool值
+    @staticmethod
+    def openFilePath(parent = None):
+        dialog = openFileDialog()
+        dialog.exec_()
+        return (dialog.Path,dialog.choosed)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = setConfigurationDailog_basic()
